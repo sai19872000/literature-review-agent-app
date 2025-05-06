@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResearchForm from "./ResearchForm";
-import { ResearchSummary, GenerateResearchRequest } from "@shared/schema";
-import { generateResearch } from "@/lib/api";
+import { ResearchSummary, GenerateResearchRequest, EnhancedTextResponse } from "@shared/schema";
+import { generateResearch, enhanceTextWithCitations } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface InputSectionProps {
@@ -18,12 +18,30 @@ export default function InputSection({
 }: InputSectionProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"upload" | "text" | "keywords">("upload");
+  const [preserveOriginalText, setPreserveOriginalText] = useState<boolean>(false);
 
   const handleSubmit = async (formData: GenerateResearchRequest) => {
     try {
       onGenerationStart();
-      const result = await generateResearch(formData);
-      onGenerationComplete(result);
+      
+      // If text input mode is selected and preserveOriginalText is enabled, use enhanceTextWithCitations
+      if (preserveOriginalText && formData.type === "text") {
+        const enhancedResult = await enhanceTextWithCitations(formData.text);
+        
+        // Convert the enhanced text response to a research summary format
+        // so it works with our existing UI
+        const result: ResearchSummary = {
+          title: "Enhanced Original Text with Citations",
+          content: enhancedResult.enhancedText,
+          citations: enhancedResult.citations
+        };
+        
+        onGenerationComplete(result);
+      } else {
+        // Otherwise use the standard generateResearch API
+        const result = await generateResearch(formData);
+        onGenerationComplete(result);
+      }
     } catch (error) {
       console.error("Error generating research:", error);
       toast({
@@ -140,7 +158,7 @@ export default function InputSection({
             </label>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center mb-4">
             <input
               type="checkbox"
               id="organize-themes"
@@ -151,6 +169,34 @@ export default function InputSection({
               Organize summary by themes
             </label>
           </div>
+          
+          {/* Toggle for preserving original text mode */}
+          <div className="flex items-center mt-6 pt-4 border-t border-gray-200">
+            <input
+              type="checkbox"
+              id="preserve-original"
+              className="w-5 h-5 text-accent focus:ring-accent rounded"
+              checked={preserveOriginalText}
+              onChange={(e) => setPreserveOriginalText(e.target.checked)}
+            />
+            <label htmlFor="preserve-original" className="ml-2 font-medium">
+              Preserve original text (only for Text Input)
+            </label>
+            {preserveOriginalText && (
+              <div className="flex items-center ml-4">
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md">
+                  Using Claude 3.7 + Perplexity agent
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {preserveOriginalText && (
+            <div className="mt-2 text-sm text-gray-600 pl-7">
+              This mode will preserve your original text and add authentic citations 
+              from original research papers at appropriate locations.
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>

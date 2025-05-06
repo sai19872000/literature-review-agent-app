@@ -1,5 +1,5 @@
 import { apiRequest } from "./queryClient";
-import { GenerateResearchRequest, ResearchSummary } from "@shared/schema";
+import { GenerateResearchRequest, ResearchSummary, EnhancedTextResponse } from "@shared/schema";
 
 /**
  * Generate a research summary based on the provided input
@@ -49,4 +49,19 @@ export async function generateResearch(
 
   const response = await apiRequest("POST", endpoint, payload);
   return await response.json();
+}
+
+/**
+ * Enhance text with original citations using the agentic citation flow
+ * @param text The text to enhance with citations
+ * @returns Enhanced text with original citations
+ */
+export async function enhanceTextWithCitations(text: string): Promise<EnhancedTextResponse> {
+  try {
+    const response = await apiRequest("POST", "/api/enhance-text", { text });
+    return await response.json();
+  } catch (error) {
+    console.error("Error enhancing text with citations:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to enhance text with citations");
+  }
 }
