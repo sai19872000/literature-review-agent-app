@@ -5,6 +5,7 @@ import multer from "multer";
 import { generateResearchSummary } from "./services/perplexity";
 import { extractTextFromPDF } from "./services/pdf-extractor";
 import { enhanceTextWithCitations } from "./services/citation-agent";
+import { processDeepResearch } from "./services/deep-research-agent";
 import { fromZodError } from "zod-validation-error";
 import { generateResearchSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
@@ -212,16 +213,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API endpoint for checking deep research status
-  app.post("/api/research/status", async (req, res) => {
+  // API endpoint for agentic deep research (Claude + Perplexity flow)
+  app.post("/api/research/agentic-deep", async (req, res) => {
     try {
-      // Validate request body
-      const statusSchema = z.object({
-        topic: z.string().min(3, "Topic must be at least 3 characters long"),
+      // Validate the request body
+      const deepResearchSchema = z.object({
+        text: z.string().min(3, "Topic must be at least 3 characters long"),
       });
       
       try {
-        statusSchema.parse(req.body);
+        deepResearchSchema.parse(req.body);
       } catch (error) {
         if (error instanceof ZodError) {
           return res.status(400).json({ message: fromZodError(error).message });
@@ -229,25 +230,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { topic } = req.body;
+      const { text } = req.body;
       
-      console.log(`Checking status for deep research on topic: "${topic}"`);
+      console.log(`Starting agentic deep research on topic: "${text}"`);
       
-      // In a real implementation, we would check if there's a completed research 
-      // for this topic in a database/cache, or initiate a new request to the API
-      // For now, we'll just make a new request with the deep research flag
+      // Process the deep research request using our agentic flow
+      const researchSummary = await processDeepResearch(text);
       
-      // Generate a new research summary with deep research mode
-      const summary = await generateResearchSummary(topic, {
-        useDeepResearch: true,
-        maxTokens: 1024 // Use a higher token limit for deep research
-      });
+      // Store the research summary in memory storage
+      const savedSummary = await storage.saveResearchSummary(researchSummary);
       
-      res.json(summary);
+      res.json(savedSummary);
     } catch (error) {
-      console.error("Error checking deep research status:", error);
+      console.error("Error processing agentic deep research:", error);
       res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to check research status" 
+        message: error instanceof Error ? error.message : "Failed to process agentic deep research" 
       });
     }
   });

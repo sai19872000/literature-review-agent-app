@@ -194,6 +194,78 @@ export async function generateResearchSummary(
 }
 
 /**
+ * Direct call to Perplexity API without additional processing
+ * Used for the agentic flow with Claude
+ * 
+ * @param query The query to send to Perplexity
+ * @param options API options
+ * @returns The raw Perplexity response content and citations
+ */
+export async function makePerplexitySonarQuery(
+  query: string,
+  options: PerplexityOptions = {}
+): Promise<{ content: string, citations: string[] }> {
+  try {
+    const apiKey = process.env.PERPLEXITY_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error("PERPLEXITY_API_KEY environment variable is not set");
+    }
+    
+    console.log(`Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`);
+    
+    const model = options.model || "llama-3.1-sonar-small-128k-online";
+    const maxTokens = options.maxTokens || 1500;
+    const temperature = options.temperature || 0.2;
+    
+    const response = await axios.post(
+      "https://api.perplexity.ai/chat/completions",
+      {
+        model,
+        messages: [
+          {
+            role: "system",
+            content: "You are a research assistant providing detailed information. Include citations to all sources."
+          },
+          {
+            role: "user",
+            content: query
+          }
+        ],
+        temperature,
+        max_tokens: maxTokens
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const perplexityResponse = response.data as PerplexityResponse;
+    
+    if (!perplexityResponse.choices || perplexityResponse.choices.length === 0) {
+      throw new Error("Invalid response from Perplexity API");
+    }
+
+    // Return the raw content and citations without processing
+    return {
+      content: perplexityResponse.choices[0].message.content,
+      citations: perplexityResponse.citations || []
+    };
+  } catch (error) {
+    console.error("Error making direct Perplexity query:", error);
+    if (axios.isAxiosError(error)) {
+      const responseData = error.response?.data;
+      console.error("API error details:", JSON.stringify(responseData, null, 2));
+      throw new Error(`Perplexity API error: ${responseData?.error?.message || error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
  * Process citation URLs from Perplexity API into structured Citation objects
  */
 function processCitations(citationUrls: string[]): Citation[] {
