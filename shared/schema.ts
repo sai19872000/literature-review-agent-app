@@ -16,6 +16,12 @@ export interface ResearchSummary {
   citations: Citation[];
 }
 
+export interface EnhancedTextResponse {
+  originalText: string;
+  enhancedText: string;
+  citations: Citation[];
+}
+
 // Database tables
 export const researchSummaries = pgTable("research_summaries", {
   id: serial("id").primaryKey(),

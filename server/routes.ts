@@ -1,9 +1,10 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
 import { generateResearchSummary } from "./services/perplexity";
 import { extractTextFromPDF } from "./services/pdf-extractor";
+import { enhanceTextWithCitations } from "./services/citation-agent";
 import { fromZodError } from "zod-validation-error";
 import { generateResearchSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
@@ -141,6 +142,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error processing keywords:", error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Failed to process keywords" 
+      });
+    }
+  });
+
+  // API endpoint for enhancing text with original citations
+  app.post("/api/enhance-text", async (req, res) => {
+    try {
+      // Validate the request body
+      const enhanceTextSchema = z.object({
+        text: z.string().min(10, "Text must be at least 10 characters long"),
+      });
+      
+      try {
+        enhanceTextSchema.parse(req.body);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ message: fromZodError(error).message });
+        }
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      const { text } = req.body;
+      
+      console.log(`Enhancing text with citations, text length: ${text.length} characters`);
+      
+      // Process the text to add citations using our agentic flow
+      const enhancedTextResponse = await enhanceTextWithCitations(text);
+      
+      res.json(enhancedTextResponse);
+    } catch (error) {
+      console.error("Error enhancing text with citations:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to enhance text with citations" 
       });
     }
   });
