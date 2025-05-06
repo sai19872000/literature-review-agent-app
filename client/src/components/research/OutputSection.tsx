@@ -190,14 +190,22 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                       // Call the API to check for updates
                       const updatedSummary = await checkDeepResearchStatus(topic);
                       
-                      // Check if we got a real update (not just another thinking state)
-                      if (updatedSummary && !updatedSummary.content.includes("Deep Research in Progress")) {
-                        toast({
-                          title: "Research complete!",
-                          description: "Your deep research results are now available.",
-                        });
+                      // Always update with the latest thinking content
+                      if (updatedSummary) {
+                        // Check if research is complete
+                        if (!updatedSummary.content.includes("Deep Research in Progress")) {
+                          toast({
+                            title: "Research complete!",
+                            description: "Your deep research results are now available.",
+                          });
+                        } else {
+                          toast({
+                            title: "Research in progress - updated!",
+                            description: "Updated with latest thinking content. Check back later for final results.",
+                          });
+                        }
                         
-                        // Update the UI with the complete research
+                        // Always update the UI with the latest content
                         if (setResearchSummary) {
                           setResearchSummary(updatedSummary);
                         } else {
