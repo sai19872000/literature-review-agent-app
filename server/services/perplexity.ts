@@ -4,13 +4,27 @@ import { ResearchSummary, Citation } from "@shared/schema";
 interface PerplexityResponse {
   id: string;
   model: string;
+  object: string;
+  created: number;
   choices: {
+    index: number;
+    finish_reason: string;
     message: {
       role: string;
       content: string;
     };
+    delta?: {
+      role: string;
+      content: string;
+    };
   }[];
-  citations?: string[];
+  citations: string[];
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    search_context_size?: string;
+  };
 }
 
 /**
@@ -27,6 +41,8 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
       throw new Error("PERPLEXITY_API_KEY environment variable is not set");
     }
 
+    console.log("Calling Perplexity API with text length:", text.length);
+
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
       {
@@ -35,13 +51,12 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
           {
             role: "system",
             content: `You are a research assistant tasked with creating comprehensive literature reviews. 
-            Format your responses using HTML paragraphs, headers, and other formatting as needed. 
             Create a well-structured academic literature review that includes:
             1. A title for the research topic
             2. An introduction section
             3. Themed sections based on the content
             4. A conclusion section
-            5. Citations in APA format
+            5. References section with citations in APA format
             
             Extract direct quotes when relevant and cite them properly. Organize the summary by themes 
             when possible. Aim for a scholarly tone and structure.`
@@ -52,12 +67,9 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
           }
         ],
         temperature: 0.2,
-        max_tokens: 4000,
-        top_p: 0.9,
-        search_domain_filter: ["scientific", "academic"],
-        return_related_questions: false,
-        search_recency_filter: "year",
-        frequency_penalty: 1
+        max_tokens: 1500, // Reduced from 4000 to avoid potential issues
+        top_p: 0.9
+        // Removed parameters that may cause issues with certain models
       },
       {
         headers: {
@@ -68,6 +80,7 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
     );
 
     const perplexityResponse = response.data as PerplexityResponse;
+    console.log("Perplexity API response:", JSON.stringify(perplexityResponse, null, 2));
     
     if (!perplexityResponse.choices || perplexityResponse.choices.length === 0) {
       throw new Error("Invalid response from Perplexity API");
@@ -75,25 +88,30 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
 
     const content = perplexityResponse.choices[0].message.content;
     
-    // Extract title and content
-    const titleMatch = content.match(/<h[1-2][^>]*>(.*?)<\/h[1-2]>/i) || 
-                     content.match(/^#+ (.+)$/m) ||
-                     content.match(/^(.+?)(?:\n|$)/);
+    // Extract title from content
+    const titleMatch = content.match(/^#+ (.+)$/m) || 
+                       content.match(/^(.+?)(?:\n|$)/);
                      
     const title = titleMatch ? titleMatch[1].trim() : "Literature Review";
     
     // Process citations from the API response
     const citations = processCitations(perplexityResponse.citations || []);
 
-    return {
+    // Create the research summary
+    const summary: ResearchSummary = {
       title,
       content,
       citations
     };
+    
+    console.log("Generated research summary with title:", title);
+    return summary;
   } catch (error) {
     console.error("Error calling Perplexity API:", error);
     if (axios.isAxiosError(error)) {
-      throw new Error(`Perplexity API error: ${error.response?.data?.message || error.message}`);
+      const responseData = error.response?.data;
+      console.error("API error details:", JSON.stringify(responseData, null, 2));
+      throw new Error(`Perplexity API error: ${responseData?.error?.message || error.message}`);
     }
     throw error;
   }
@@ -103,15 +121,23 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
  * Process citation URLs from Perplexity API into structured Citation objects
  */
 function processCitations(citationUrls: string[]): Citation[] {
-  return citationUrls.map((url) => {
-    // Extract domain name for a basic author reference if we can't parse it better
+  return citationUrls.map((url, index) => {
+    // Extract domain name for a basic author reference
     const domainMatch = url.match(/https?:\/\/(?:www\.)?([^\/]+)/i);
-    const domain = domainMatch ? domainMatch[1] : "Unknown Source";
+    const domain = domainMatch 
+      ? domainMatch[1].replace(/\.(com|org|edu|gov|net)$/i, '')
+      : "Unknown Source";
     
-    // Create a basic citation, in a real app this would parse more information from the URL
+    // Format domain for better readability as author
+    const formattedDomain = domain
+      .split('.')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+    
+    // Create a citation with domain as author
     return {
-      authors: `${domain} (n.d.)`,
-      text: `. Retrieved from ${url}`,
+      authors: `${formattedDomain} (n.d.)`,
+      text: `Resource ${index + 1}: ${url.split('/').slice(0, 3).join('/')}`,
       url
     };
   });

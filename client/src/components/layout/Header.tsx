@@ -11,18 +11,18 @@ export default function Header() {
         <nav>
           <ul className="flex space-x-6">
             <li>
-              <Link href="/">
-                <a className="hover:text-accent transition-colors">Home</a>
+              <Link href="/" className="hover:text-accent transition-colors">
+                Home
               </Link>
             </li>
             <li>
-              <Link href="/#how-it-works">
-                <a className="hover:text-accent transition-colors">How It Works</a>
+              <Link href="/#how-it-works" className="hover:text-accent transition-colors">
+                How It Works
               </Link>
             </li>
             <li>
-              <Link href="/#about">
-                <a className="hover:text-accent transition-colors">About</a>
+              <Link href="/#about" className="hover:text-accent transition-colors">
+                About
               </Link>
             </li>
           </ul>

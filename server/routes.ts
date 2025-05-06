@@ -24,6 +24,26 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Test endpoint for Perplexity API
+  app.get("/api/v1/test-perplexity", async (req, res) => {
+    try {
+      console.log("Testing Perplexity API...");
+      const testPrompt = "Explain what organoids are in 2-3 paragraphs with citations";
+      const summary = await generateResearchSummary(testPrompt);
+      res.json({
+        success: true,
+        summary
+      });
+    } catch (error) {
+      console.error("Error testing Perplexity API:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to test Perplexity API",
+        error: error instanceof Error ? error.toString() : "Unknown error"
+      });
+    }
+  });
+
   // API endpoint for generating research summary from PDF
   app.post("/api/research/pdf", upload.single("file"), async (req, res) => {
     try {
@@ -103,7 +123,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { keywords, sourcesLimit } = req.body;
+      const { keywords, sourcesLimit = 5 } = req.body;
+      
+      console.log(`Generating research on keywords: "${keywords}" with ${sourcesLimit} sources`);
       
       // Generate research summary using Perplexity API
       const summary = await generateResearchSummary(
