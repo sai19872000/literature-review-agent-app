@@ -50,6 +50,7 @@ export default function Home() {
         <OutputSection 
           isProcessing={isProcessing} 
           researchSummary={researchSummary}
+          setResearchSummary={setResearchSummary}
         />
       </div>
     </div>

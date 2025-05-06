@@ -1,16 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResearchSummary } from "@shared/schema";
 import CitationsList from "./CitationsList";
 import { useToast } from "@/hooks/use-toast";
+import { checkDeepResearchStatus } from "@/lib/api";
 
 interface OutputSectionProps {
   isProcessing: boolean;
   researchSummary: ResearchSummary | null;
+  setResearchSummary?: (summary: ResearchSummary) => void; // Optional callback to update parent state
 }
 
-export default function OutputSection({ isProcessing, researchSummary }: OutputSectionProps) {
+export default function OutputSection({ isProcessing, researchSummary, setResearchSummary }: OutputSectionProps) {
   const { toast } = useToast();
+  const [localSummary, setLocalSummary] = useState<ResearchSummary | null>(researchSummary);
 
   const copyToClipboard = async () => {
     if (!researchSummary) return;
@@ -155,18 +158,60 @@ export default function OutputSection({ isProcessing, researchSummary }: OutputS
               <div className="mt-6 flex justify-center">
                 <button 
                   className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-md font-medium"
-                  onClick={() => {
+                  onClick={async () => {
+                    // Extract topic from title or content
+                    let topic = "";
+                    if (researchSummary) {
+                      if (researchSummary.title && researchSummary.title !== "Literature Review") {
+                        topic = researchSummary.title;
+                      } else {
+                        // Try to extract from content - get the first few words after "Research in Progress"
+                        const contentText = researchSummary.content || "";
+                        const thinkMatch = contentText.match(/Deep Research in Progress.*?analyzing.*?sources/i);
+                        if (thinkMatch) {
+                          topic = contentText.substring(contentText.indexOf("analyzing") + 10, contentText.indexOf("sources") - 1);
+                        }
+                      }
+                    }
+                    
+                    if (!topic) topic = "previous query"; // Fallback
+                    
                     toast({
                       title: "Checking for updates",
                       description: "Retrieving the latest research progress...",
                     });
-                    // This would be replaced with an actual API call to check progress
-                    setTimeout(() => {
+                    
+                    try {
+                      // Call the API to check for updates
+                      const updatedSummary = await checkDeepResearchStatus(topic);
+                      
+                      // Check if we got a real update (not just another thinking state)
+                      if (updatedSummary && !updatedSummary.content.includes("Deep Research in Progress")) {
+                        toast({
+                          title: "Research complete!",
+                          description: "Your deep research results are now available.",
+                        });
+                        
+                        // Update the UI with the complete research
+                        if (setResearchSummary) {
+                          setResearchSummary(updatedSummary);
+                        } else {
+                          setLocalSummary(updatedSummary);
+                        }
+                      } else {
+                        toast({
+                          title: "Deep research still in progress",
+                          description: "Please check back in a few minutes as deep research can take 3-10 minutes to complete.",
+                        });
+                      }
+                    } catch (error) {
+                      console.error("Error checking for updates:", error);
                       toast({
-                        title: "Deep research still in progress",
-                        description: "Please check back in a few minutes as deep research can take 3-10 minutes to complete.",
+                        title: "Error checking for updates",
+                        description: error instanceof Error ? error.message : "Failed to check research status",
+                        variant: "destructive",
                       });
-                    }, 1000);
+                    }
                   }}
                 >
                   <svg 
