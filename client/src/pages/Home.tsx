@@ -5,6 +5,7 @@ import { ResearchSummary } from "@shared/schema";
 
 export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDeepResearch, setIsDeepResearch] = useState(false);
   const [researchSummary, setResearchSummary] = useState<ResearchSummary | null>(null);
 
   return (
@@ -21,10 +22,28 @@ export default function Home() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <InputSection 
-          onGenerationStart={() => setIsProcessing(true)}
+          onGenerationStart={({ isDeepResearch } = {}) => {
+            // Start processing and set deep research flag
+            setIsProcessing(true);
+            setIsDeepResearch(!!isDeepResearch);
+            
+            // Initialize with a placeholder for deep research mode
+            if (isDeepResearch) {
+              setResearchSummary({
+                title: "",
+                content: "",
+                citations: [],
+                modelUsed: "sonar-deep-research" // This triggers special loading UI
+              });
+            } else {
+              // Clear any previous summary during loading
+              setResearchSummary(null);
+            }
+          }}
           onGenerationComplete={(data) => {
             setResearchSummary(data);
             setIsProcessing(false);
+            setIsDeepResearch(false);
           }}
           isProcessing={isProcessing}
         />

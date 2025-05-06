@@ -6,7 +6,7 @@ import { generateResearch, enhanceTextWithCitations } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface InputSectionProps {
-  onGenerationStart: () => void;
+  onGenerationStart: (options?: { isDeepResearch?: boolean }) => void;
   onGenerationComplete: (data: ResearchSummary) => void;
   isProcessing: boolean;
 }
@@ -28,8 +28,8 @@ export default function InputSection({
       // Update deep research mode state
       setIsUsingDeepResearch(useDeepResearch);
       
-      // Tell parent component we're starting
-      onGenerationStart();
+      // Tell parent component we're starting, with deep research flag if needed
+      onGenerationStart({ isDeepResearch: useDeepResearch });
       
       // If text input mode is selected and preserveOriginalText is enabled, use enhanceTextWithCitations
       if (preserveOriginalText && formData.type === "text") {
