@@ -51,16 +51,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Testing Perplexity Deep Research API mode...");
       const testPrompt = "Explain what quantum computing is and its latest advancements in 3 paragraphs with citations";
       
-      // Explicitly set useDeepResearch to true string to test the conversion
-      const summary = await generateResearchSummary(testPrompt, {
+      // For debugging - display all information about the module and its models
+      console.log("Perplexity API available models:");
+      console.log("- llama-3.1-sonar-small-128k-online");
+      console.log("- llama-3.1-sonar-large-128k-online");
+      console.log("- llama-3.1-sonar-huge-128k-online");
+      console.log("- sonar-deep-research (if available)");
+      
+      // Create options object with explicit string "true" to test conversion
+      const options = {
         useDeepResearch: "true",
         maxTokens: 800
-      });
+      };
+      
+      console.log("Options before calling API:", JSON.stringify(options, null, 2));
+      
+      // Explicitly set useDeepResearch to true string to test the conversion
+      const summary = await generateResearchSummary(testPrompt, options);
       
       res.json({
         success: true,
         summary,
-        usedDeepResearch: true
+        usedDeepResearch: true,
+        requestedModel: "sonar-deep-research",
+        actualModelUsed: summary.modelUsed || "unknown"
       });
     } catch (error) {
       console.error("Error testing Perplexity Deep Research API:", error);

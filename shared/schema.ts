@@ -14,6 +14,7 @@ export interface ResearchSummary {
   title: string;
   content: string;
   citations: Citation[];
+  modelUsed?: string;  // The Perplexity model used for this research
 }
 
 export interface EnhancedTextResponse {

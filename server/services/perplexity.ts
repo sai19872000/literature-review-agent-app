@@ -127,11 +127,12 @@ export async function generateResearchSummary(
     // Process citations from the API response
     const citations = processCitations(perplexityResponse.citations || []);
 
-    // Create the research summary
+    // Create the research summary with model information
     const summary: ResearchSummary = {
       title,
       content,
-      citations
+      citations,
+      modelUsed: perplexityResponse.model || model
     };
     
     console.log("Generated research summary with title:", title);
