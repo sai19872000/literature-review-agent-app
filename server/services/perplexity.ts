@@ -50,16 +50,7 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
         messages: [
           {
             role: "system",
-            content: `You are a research assistant tasked with creating comprehensive literature reviews. 
-            Create a well-structured academic literature review that includes:
-            1. A title for the research topic
-            2. An introduction section
-            3. Themed sections based on the content
-            4. A conclusion section
-            5. References section with citations in APA format
-            
-            Extract direct quotes when relevant and cite them properly. Organize the summary by themes 
-            when possible. Aim for a scholarly tone and structure.`
+            content: "Be precise and concise in creating a literature review."
           },
           {
             role: "user",
@@ -67,9 +58,7 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
           }
         ],
         temperature: 0.2,
-        max_tokens: 1500, // Reduced from 4000 to avoid potential issues
-        top_p: 0.9
-        // Removed parameters that may cause issues with certain models
+        max_tokens: 150
       },
       {
         headers: {

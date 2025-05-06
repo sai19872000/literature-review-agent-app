@@ -13,23 +13,23 @@ export default function Footer() {
             <h4 className="font-serif text-lg font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/#how-it-works">
-                  <a className="text-gray-300 hover:text-white transition-colors">How It Works</a>
+                <Link href="/#how-it-works" className="text-gray-300 hover:text-white transition-colors">
+                  How It Works
                 </Link>
               </li>
               <li>
-                <Link href="/faq">
-                  <a className="text-gray-300 hover:text-white transition-colors">FAQ</a>
+                <Link href="/faq" className="text-gray-300 hover:text-white transition-colors">
+                  FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/privacy">
-                  <a className="text-gray-300 hover:text-white transition-colors">Privacy Policy</a>
+                <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms">
-                  <a className="text-gray-300 hover:text-white transition-colors">Terms of Service</a>
+                <Link href="/terms" className="text-gray-300 hover:text-white transition-colors">
+                  Terms of Service
                 </Link>
               </li>
             </ul>
