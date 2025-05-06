@@ -86,3 +86,18 @@ export async function enhanceTextWithCitations(text: string): Promise<EnhancedTe
     throw new Error(error instanceof Error ? error.message : "Failed to enhance text with citations");
   }
 }
+
+/**
+ * Check the status of a deep research request
+ * @param topic The topic/query that was originally submitted for deep research
+ * @returns The latest state of the deep research
+ */
+export async function checkDeepResearchStatus(topic: string): Promise<ResearchSummary> {
+  try {
+    const response = await apiRequest("POST", "/api/research/status", { topic });
+    return await response.json();
+  } catch (error) {
+    console.error("Error checking deep research status:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to check deep research status");
+  }
+}

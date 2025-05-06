@@ -119,22 +119,47 @@ export async function generateResearchSummary(
     // Get raw content from API response
     let content = perplexityResponse.choices[0].message.content;
     
-    // Process content to remove <think> tags and internal thinking for deep research mode
+    // Process content when it includes thinking tags for deep research mode
     if (content.includes("<think>")) {
-      console.log("Detected thinking output from deep research mode, filtering...");
+      console.log("Detected thinking output from deep research mode...");
       
-      // Remove <think> tags and everything between them
-      content = content.replace(/<think>[\s\S]*?<\/think>/g, "");
+      // Extract the thinking content to display as intermediary output
+      let thinkingContent = "";
+      const thinkMatch = content.match(/<think>([\s\S]*?)(<\/think>|$)/);
       
-      // Remove any standalone <think> tag (in case closing tag is missing)
-      content = content.replace(/<think>[\s\S]*/g, "");
-      
-      // Clean up any remaining markers or artifacts
-      content = content.trim();
-      
-      // If content is empty after filtering, use a fallback message
-      if (!content || content.length < 20) {
-        content = "The deep research analysis is still in progress. Please try again with a more specific query or use the standard research mode for faster results.";
+      if (thinkMatch && thinkMatch[1]) {
+        thinkingContent = thinkMatch[1].trim();
+        
+        // Format the thinking output for display
+        if (thinkingContent.length > 0) {
+          // Keep the thinking content but format it for display
+          content = `
+          <div class="bg-purple-50 p-4 rounded-lg mb-6 border border-purple-200">
+            <h3 class="text-purple-800 font-medium mb-2">🧠 Deep Research in Progress</h3>
+            <p class="text-sm text-purple-700 mb-4">The AI is currently analyzing academic sources. This preview shows its thinking process and will be replaced with the final research when complete.</p>
+            <div class="text-sm text-gray-700 max-h-[300px] overflow-y-auto">
+              ${thinkingContent.slice(0, 2000)}${thinkingContent.length > 2000 ? '...' : ''}
+            </div>
+          </div>
+
+          <p class="text-center text-purple-700 py-4 mb-4 border-b border-t border-purple-200">
+            <strong>Final research results will appear here when processing is complete.</strong><br>
+            (This may take 3-10 minutes for comprehensive deep research)
+          </p>`;
+        }
+      } else {
+        // If we can't extract thinking content, provide a status message
+        content = `
+        <div class="bg-purple-50 p-4 rounded-lg mb-6 border border-purple-200">
+          <h3 class="text-purple-800 font-medium mb-2">🧠 Deep Research in Progress</h3>
+          <p class="text-purple-700">
+            The AI is currently analyzing academic sources. Deep research mode typically takes 3-10 minutes to complete.
+            Please wait while the analysis is being performed.
+          </p>
+          <div class="w-full bg-purple-200 h-2 mt-4 rounded-full overflow-hidden">
+            <div class="bg-purple-600 h-full w-2/5 animate-pulse"></div>
+          </div>
+        </div>`;
       }
     }
     

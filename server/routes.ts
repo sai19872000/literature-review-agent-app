@@ -212,6 +212,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API endpoint for checking deep research status
+  app.post("/api/research/status", async (req, res) => {
+    try {
+      // Validate request body
+      const statusSchema = z.object({
+        topic: z.string().min(3, "Topic must be at least 3 characters long"),
+      });
+      
+      try {
+        statusSchema.parse(req.body);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ message: fromZodError(error).message });
+        }
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      const { topic } = req.body;
+      
+      console.log(`Checking status for deep research on topic: "${topic}"`);
+      
+      // In a real implementation, we would check if there's a completed research 
+      // for this topic in a database/cache, or initiate a new request to the API
+      // For now, we'll just make a new request with the deep research flag
+      
+      // Generate a new research summary with deep research mode
+      const summary = await generateResearchSummary(topic, {
+        useDeepResearch: true,
+        maxTokens: 1024 // Use a higher token limit for deep research
+      });
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error checking deep research status:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to check research status" 
+      });
+    }
+  });
+
   // API endpoint for enhancing text with original citations
   app.post("/api/enhance-text", async (req, res) => {
     try {

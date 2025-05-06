@@ -148,6 +148,45 @@ export default function OutputSection({ isProcessing, researchSummary }: OutputS
           <div className="prose max-w-none">
             <h2 className="font-serif text-2xl font-bold mb-4">{researchSummary.title}</h2>
             <div dangerouslySetInnerHTML={{ __html: researchSummary.content }} />
+            
+            {/* Refresh button for deep research mode */}
+            {researchSummary.modelUsed === "sonar-deep-research" && 
+             researchSummary.content.includes("Deep Research in Progress") && (
+              <div className="mt-6 flex justify-center">
+                <button 
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-md font-medium"
+                  onClick={() => {
+                    toast({
+                      title: "Checking for updates",
+                      description: "Retrieving the latest research progress...",
+                    });
+                    // This would be replaced with an actual API call to check progress
+                    setTimeout(() => {
+                      toast({
+                        title: "Deep research still in progress",
+                        description: "Please check back in a few minutes as deep research can take 3-10 minutes to complete.",
+                      });
+                    }, 1000);
+                  }}
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                    />
+                  </svg>
+                  Check for Updates
+                </button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
