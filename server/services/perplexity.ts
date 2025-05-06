@@ -39,7 +39,7 @@ type PerplexityModel =
  */
 interface PerplexityOptions {
   model?: PerplexityModel;
-  useDeepResearch?: boolean;
+  useDeepResearch?: boolean | string; // Allow string for form-data "true"/"false"
   maxTokens?: number;
   temperature?: number;
 }
@@ -63,7 +63,14 @@ export async function generateResearchSummary(
     }
 
     // Default to "llama-3.1-sonar-small-128k-online" unless deep research is enabled
-    const model = options.useDeepResearch 
+    // Convert to boolean in case the value is a string "true" from form data
+    const useDeepResearch = 
+      options.useDeepResearch === true || 
+      options.useDeepResearch === "true";
+    
+    console.log(`Deep research requested: ${useDeepResearch}`);
+    
+    const model = useDeepResearch
       ? "sonar-deep-research" 
       : (options.model || "llama-3.1-sonar-small-128k-online");
     
@@ -72,6 +79,8 @@ export async function generateResearchSummary(
     
     console.log(`Calling Perplexity API with model: ${model}, text length: ${text.length}`);
     console.log(`Using maxTokens: ${maxTokens}, temperature: ${temperature}`);
+    console.log(`Deep research mode enabled: ${useDeepResearch ? 'YES' : 'NO'}`);
+    console.log(`Options received:`, JSON.stringify(options, null, 2));
 
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
