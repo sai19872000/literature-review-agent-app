@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 33% 98%;
+  --foreground: 210 29% 24%;
+  
+  --muted: 210 10% 90%;
+  --muted-foreground: 210 10% 40%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 29% 24%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 210 29% 24%;
+  
+  --border: 210 10% 90%;
+  --input: 210 10% 90%;
+  
+  --primary: 210 35% 24%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 210 21% 30%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --accent: 210 79% 53%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  
+  --ring: 210 29% 24%;
+  
+  --radius: 0.5rem;
+  
+  --chart-1: 210 79% 53%;
+  --chart-2: 160 64% 39%;
+  --chart-3: 326 72% 48%;
+  --chart-4: 25 85% 53%;
+  --chart-5: 271 68% 51%;
+  
+  --sidebar-background: 210 33% 98%;
+  --sidebar-foreground: 210 29% 24%;
+  --sidebar-primary: 210 79% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 210 79% 53%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 210 10% 90%;
+  --sidebar-ring: 210 29% 24%;
+}
+
+.dark {
+  --background: 210 29% 10%;
+  --foreground: 0 0% 98%;
+  
+  --muted: 210 10% 20%;
+  --muted-foreground: 210 10% 70%;
+  
+  --popover: 210 29% 13%;
+  --popover-foreground: 0 0% 98%;
+  
+  --card: 210 29% 13%;
+  --card-foreground: 0 0% 98%;
+  
+  --border: 210 10% 20%;
+  --input: 210 10% 20%;
+  
+  --primary: 210 35% 24%;
+  --primary-foreground: 0 0% 98%;
+  
+  --secondary: 210 21% 30%;
+  --secondary-foreground: 0 0% 98%;
+  
+  --accent: 210 79% 53%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  
+  --ring: 210 79% 53%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+
+  .citation {
+    text-indent: -2em;
+    margin-left: 2em;
+  }
+}
