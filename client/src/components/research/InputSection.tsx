@@ -20,9 +20,15 @@ export default function InputSection({
   const [activeTab, setActiveTab] = useState<"upload" | "text" | "keywords">("upload");
   const [preserveOriginalText, setPreserveOriginalText] = useState<boolean>(false);
   const [useDeepResearch, setUseDeepResearch] = useState<boolean>(false);
+  // Tracking if we're using deep research for the loading state
+  const [isUsingDeepResearch, setIsUsingDeepResearch] = useState<boolean>(false);
 
   const handleSubmit = async (formData: GenerateResearchRequest) => {
     try {
+      // Update deep research mode state
+      setIsUsingDeepResearch(useDeepResearch);
+      
+      // Tell parent component we're starting
       onGenerationStart();
       
       // If text input mode is selected and preserveOriginalText is enabled, use enhanceTextWithCitations
@@ -34,7 +40,8 @@ export default function InputSection({
         const result: ResearchSummary = {
           title: "Enhanced Original Text with Citations",
           content: enhancedResult.enhancedText,
-          citations: enhancedResult.citations
+          citations: enhancedResult.citations,
+          modelUsed: "claude-3.7-sonnet-20250219" // Always Claude for enhanced text
         };
         
         onGenerationComplete(result);

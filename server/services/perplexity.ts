@@ -116,7 +116,27 @@ export async function generateResearchSummary(
       throw new Error("Invalid response from Perplexity API");
     }
 
-    const content = perplexityResponse.choices[0].message.content;
+    // Get raw content from API response
+    let content = perplexityResponse.choices[0].message.content;
+    
+    // Process content to remove <think> tags and internal thinking for deep research mode
+    if (content.includes("<think>")) {
+      console.log("Detected thinking output from deep research mode, filtering...");
+      
+      // Remove <think> tags and everything between them
+      content = content.replace(/<think>[\s\S]*?<\/think>/g, "");
+      
+      // Remove any standalone <think> tag (in case closing tag is missing)
+      content = content.replace(/<think>[\s\S]*/g, "");
+      
+      // Clean up any remaining markers or artifacts
+      content = content.trim();
+      
+      // If content is empty after filtering, use a fallback message
+      if (!content || content.length < 20) {
+        content = "The deep research analysis is still in progress. Please try again with a more specific query or use the standard research mode for faster results.";
+      }
+    }
     
     // Extract title from content
     const titleMatch = content.match(/^#+ (.+)$/m) || 
