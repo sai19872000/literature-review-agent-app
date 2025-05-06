@@ -44,6 +44,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Test endpoint for Perplexity Deep Research API
+  app.get("/api/v1/test-deep-research", async (req, res) => {
+    try {
+      console.log("Testing Perplexity Deep Research API mode...");
+      const testPrompt = "Explain what quantum computing is and its latest advancements in 3 paragraphs with citations";
+      
+      // Explicitly set useDeepResearch to true string to test the conversion
+      const summary = await generateResearchSummary(testPrompt, {
+        useDeepResearch: "true",
+        maxTokens: 800
+      });
+      
+      res.json({
+        success: true,
+        summary,
+        usedDeepResearch: true
+      });
+    } catch (error) {
+      console.error("Error testing Perplexity Deep Research API:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to test Perplexity Deep Research API",
+        error: error instanceof Error ? error.toString() : "Unknown error"
+      });
+    }
+  });
 
   // API endpoint for generating research summary from PDF
   app.post("/api/research/pdf", upload.single("file"), async (req, res) => {
@@ -92,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create a dedicated text schema since we can't use pick() on a discriminated union
         const textSchema = z.object({
           text: z.string().min(10, "Text must be at least 10 characters long"),
-          useDeepResearch: z.boolean().optional(),
+          useDeepResearch: z.union([z.boolean(), z.string()]).optional(), // Accept boolean or string value
           maxTokens: z.number().int().positive().optional(),
         });
         textSchema.parse(req.body);
@@ -131,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const keywordsSchema = z.object({
           keywords: z.string().min(3, "Keywords must be at least 3 characters long"),
           sourcesLimit: z.number().int().min(1).max(20).default(10),
-          useDeepResearch: z.boolean().optional(),
+          useDeepResearch: z.union([z.boolean(), z.string()]).optional(), // Accept boolean or string value
           maxTokens: z.number().int().positive().optional(),
         });
         keywordsSchema.parse(req.body);
