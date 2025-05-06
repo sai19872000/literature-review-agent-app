@@ -157,9 +157,8 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
             <h2 className="font-serif text-2xl font-bold mb-4">{researchSummary.title}</h2>
             <div dangerouslySetInnerHTML={{ __html: researchSummary.content }} />
             
-            {/* Refresh button for deep research mode */}
-            {researchSummary.modelUsed === "sonar-deep-research" && 
-             researchSummary.content.includes("Deep Research in Progress") && (
+            {/* Research Again button for deep research mode */}
+            {researchSummary.modelUsed === "sonar-deep-research" && (
               <div className="mt-6 flex justify-center">
                 <button 
                   className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-md font-medium"
@@ -170,58 +169,41 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                       if (researchSummary.title && researchSummary.title !== "Literature Review") {
                         topic = researchSummary.title;
                       } else {
-                        // Try to extract from content - get the first few words after "Research in Progress"
+                        // Extract the main topic from the content
                         const contentText = researchSummary.content || "";
-                        const thinkMatch = contentText.match(/Deep Research in Progress.*?analyzing.*?sources/i);
-                        if (thinkMatch) {
-                          topic = contentText.substring(contentText.indexOf("analyzing") + 10, contentText.indexOf("sources") - 1);
-                        }
+                        
+                        // Just use the first 100 characters if we can't find a better topic
+                        topic = contentText.substring(0, 100);
                       }
                     }
                     
                     if (!topic) topic = "previous query"; // Fallback
                     
                     toast({
-                      title: "Checking for updates",
-                      description: "Retrieving the latest research progress...",
+                      title: "Starting new research",
+                      description: "Performing deep research on this topic...",
                     });
                     
                     try {
-                      // Call the API to check for updates
-                      const updatedSummary = await checkDeepResearchStatus(topic);
+                      // Perform a new agentic deep research request with the same topic
+                      const updatedSummary = await performAgenticDeepResearch(topic);
                       
-                      // Always update with the latest thinking content
-                      if (updatedSummary) {
-                        // Check if research is complete
-                        if (!updatedSummary.content.includes("Deep Research in Progress")) {
-                          toast({
-                            title: "Research complete!",
-                            description: "Your deep research results are now available.",
-                          });
-                        } else {
-                          toast({
-                            title: "Research in progress - updated!",
-                            description: "Updated with latest thinking content. Check back later for final results.",
-                          });
-                        }
+                      toast({
+                        title: "Research complete!",
+                        description: "Fresh research results are now available.",
+                      });
                         
-                        // Always update the UI with the latest content
-                        if (setResearchSummary) {
-                          setResearchSummary(updatedSummary);
-                        } else {
-                          setLocalSummary(updatedSummary);
-                        }
+                      // Update the UI with the latest content
+                      if (setResearchSummary) {
+                        setResearchSummary(updatedSummary);
                       } else {
-                        toast({
-                          title: "Deep research still in progress",
-                          description: "Please check back in a few minutes as deep research can take 3-10 minutes to complete.",
-                        });
+                        setLocalSummary(updatedSummary);
                       }
                     } catch (error: any) {
-                      console.error("Error checking for updates:", error);
+                      console.error("Error performing research:", error);
                       toast({
-                        title: "Error checking for updates",
-                        description: error instanceof Error ? error.message : "Failed to check research status",
+                        title: "Error with research",
+                        description: error instanceof Error ? error.message : "Failed to complete research",
                         variant: "destructive",
                       });
                     }
@@ -241,7 +223,7 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
                     />
                   </svg>
-                  Check for Updates
+                  Research Again
                 </button>
               </div>
             )}
