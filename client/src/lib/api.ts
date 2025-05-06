@@ -5,16 +5,33 @@ import { GenerateResearchRequest, ResearchSummary, EnhancedTextResponse } from "
  * Generate a research summary based on the provided input
  */
 export async function generateResearch(
-  request: GenerateResearchRequest
+  request: GenerateResearchRequest,
+  options?: { useDeepResearch?: boolean; maxTokens?: number }
 ): Promise<ResearchSummary> {
   let endpoint = "";
   let payload: any = {};
+
+  // Include research options if provided
+  const deepResearchOptions = options?.useDeepResearch 
+    ? { 
+        useDeepResearch: true,
+        maxTokens: options.maxTokens || 800 // Default to 800 tokens for deep research
+      } 
+    : undefined;
 
   switch (request.type) {
     case "pdf": {
       endpoint = "/api/research/pdf";
       const formData = new FormData();
       formData.append("file", request.pdfFile);
+      
+      // Add deep research flag if needed
+      if (deepResearchOptions) {
+        formData.append("useDeepResearch", "true");
+        if (deepResearchOptions.maxTokens) {
+          formData.append("maxTokens", deepResearchOptions.maxTokens.toString());
+        }
+      }
       
       // Using fetch directly instead of apiRequest for FormData
       const response = await fetch(endpoint, {
@@ -33,7 +50,10 @@ export async function generateResearch(
 
     case "text": {
       endpoint = "/api/research/text";
-      payload = { text: request.text };
+      payload = { 
+        text: request.text,
+        ...deepResearchOptions
+      };
       break;
     }
 
@@ -41,7 +61,8 @@ export async function generateResearch(
       endpoint = "/api/research/keywords";
       payload = { 
         keywords: request.keywords,
-        sourcesLimit: request.sourcesLimit
+        sourcesLimit: request.sourcesLimit,
+        ...deepResearchOptions
       };
       break;
     }

@@ -58,9 +58,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!pdfText || pdfText.trim().length === 0) {
         return res.status(400).json({ message: "Could not extract text from PDF" });
       }
+      
+      // Check if deep research mode is requested
+      const useDeepResearch = req.body.useDeepResearch === "true";
+      const maxTokens = req.body.maxTokens ? parseInt(req.body.maxTokens) : undefined;
+      
+      if (useDeepResearch) {
+        console.log("Using deep research mode for PDF with max tokens:", maxTokens || "default");
+      }
 
       // Generate research summary using Perplexity API
-      const summary = await generateResearchSummary(pdfText);
+      const summary = await generateResearchSummary(pdfText, {
+        useDeepResearch,
+        maxTokens
+      });
       
       // Store the research summary in memory storage
       const savedSummary = await storage.saveResearchSummary(summary);
@@ -81,6 +92,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create a dedicated text schema since we can't use pick() on a discriminated union
         const textSchema = z.object({
           text: z.string().min(10, "Text must be at least 10 characters long"),
+          useDeepResearch: z.boolean().optional(),
+          maxTokens: z.number().int().positive().optional(),
         });
         textSchema.parse(req.body);
       } catch (error) {
@@ -90,10 +103,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { text } = req.body;
+      const { text, useDeepResearch, maxTokens } = req.body;
       
       // Generate research summary using Perplexity API
-      const summary = await generateResearchSummary(text);
+      const summary = await generateResearchSummary(text, {
+        useDeepResearch,
+        maxTokens
+      });
       
       // Store the research summary in memory storage
       const savedSummary = await storage.saveResearchSummary(summary);
@@ -115,6 +131,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const keywordsSchema = z.object({
           keywords: z.string().min(3, "Keywords must be at least 3 characters long"),
           sourcesLimit: z.number().int().min(1).max(20).default(10),
+          useDeepResearch: z.boolean().optional(),
+          maxTokens: z.number().int().positive().optional(),
         });
         keywordsSchema.parse(req.body);
       } catch (error) {
@@ -124,14 +142,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { keywords, sourcesLimit = 5 } = req.body;
+      const { keywords, sourcesLimit = 5, useDeepResearch, maxTokens } = req.body;
       
       console.log(`Generating research on keywords: "${keywords}" with ${sourcesLimit} sources`);
+      if (useDeepResearch) {
+        console.log("Using deep research mode with max tokens:", maxTokens || "default");
+      }
       
       // Generate research summary using Perplexity API
       const summary = await generateResearchSummary(
         `Provide a comprehensive literature review on the following topics: ${keywords}. 
-        Include up to ${sourcesLimit} academic sources.`
+        Include up to ${sourcesLimit} academic sources.`,
+        {
+          useDeepResearch,
+          maxTokens
+        }
       );
       
       // Store the research summary in memory storage

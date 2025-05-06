@@ -27,13 +27,34 @@ interface PerplexityResponse {
   };
 }
 
+// Available Perplexity models
+type PerplexityModel = 
+  | "llama-3.1-sonar-small-128k-online"
+  | "llama-3.1-sonar-large-128k-online" 
+  | "llama-3.1-sonar-huge-128k-online"
+  | "sonar-deep-research";
+
+/**
+ * Configuration options for Perplexity API calls
+ */
+interface PerplexityOptions {
+  model?: PerplexityModel;
+  useDeepResearch?: boolean;
+  maxTokens?: number;
+  temperature?: number;
+}
+
 /**
  * Generates a research summary using Perplexity Sonar AI API
  * 
  * @param text The text content to analyze and summarize
+ * @param options Configuration options for the API call
  * @returns A research summary with citations
  */
-export async function generateResearchSummary(text: string): Promise<ResearchSummary> {
+export async function generateResearchSummary(
+  text: string, 
+  options: PerplexityOptions = {}
+): Promise<ResearchSummary> {
   try {
     const apiKey = process.env.PERPLEXITY_API_KEY;
     
@@ -41,24 +62,35 @@ export async function generateResearchSummary(text: string): Promise<ResearchSum
       throw new Error("PERPLEXITY_API_KEY environment variable is not set");
     }
 
-    console.log("Calling Perplexity API with text length:", text.length);
+    // Default to "llama-3.1-sonar-small-128k-online" unless deep research is enabled
+    const model = options.useDeepResearch 
+      ? "sonar-deep-research" 
+      : (options.model || "llama-3.1-sonar-small-128k-online");
+    
+    const maxTokens = options.maxTokens || (model === "sonar-deep-research" ? 500 : 150);
+    const temperature = options.temperature || 0.2;
+    
+    console.log(`Calling Perplexity API with model: ${model}, text length: ${text.length}`);
+    console.log(`Using maxTokens: ${maxTokens}, temperature: ${temperature}`);
 
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
       {
-        model: "llama-3.1-sonar-small-128k-online",
+        model,
         messages: [
           {
             role: "system",
-            content: "Be precise and concise in creating a literature review."
+            content: model === "sonar-deep-research" 
+              ? "You are a research assistant providing in-depth literature reviews with comprehensive citations. Focus on academic sources and peer-reviewed research."
+              : "Be precise and concise in creating a literature review."
           },
           {
             role: "user",
             content: text
           }
         ],
-        temperature: 0.2,
-        max_tokens: 150
+        temperature,
+        max_tokens: maxTokens
       },
       {
         headers: {

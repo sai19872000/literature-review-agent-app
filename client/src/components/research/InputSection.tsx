@@ -19,6 +19,7 @@ export default function InputSection({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"upload" | "text" | "keywords">("upload");
   const [preserveOriginalText, setPreserveOriginalText] = useState<boolean>(false);
+  const [useDeepResearch, setUseDeepResearch] = useState<boolean>(false);
 
   const handleSubmit = async (formData: GenerateResearchRequest) => {
     try {
@@ -38,8 +39,16 @@ export default function InputSection({
         
         onGenerationComplete(result);
       } else {
-        // Otherwise use the standard generateResearch API
-        const result = await generateResearch(formData);
+        // Configure deep research options if enabled
+        const researchOptions = useDeepResearch 
+          ? { 
+              useDeepResearch: true,
+              maxTokens: 800 // Use a higher token limit for deep research
+            } 
+          : undefined;
+          
+        // Call the generateResearch API with options
+        const result = await generateResearch(formData, researchOptions);
         onGenerationComplete(result);
       }
     } catch (error) {
@@ -195,6 +204,38 @@ export default function InputSection({
             <div className="mt-2 text-sm text-gray-600 pl-7">
               This mode will preserve your original text and add authentic citations 
               from original research papers at appropriate locations.
+            </div>
+          )}
+          
+          {/* Toggle for Deep Research mode */}
+          <div className="flex items-center mt-4 pt-4 border-t border-gray-200">
+            <input
+              type="checkbox"
+              id="deep-research"
+              className="w-5 h-5 text-accent focus:ring-accent rounded"
+              checked={useDeepResearch}
+              onChange={(e) => setUseDeepResearch(e.target.checked)}
+              disabled={preserveOriginalText} // Can't use both modes at once
+            />
+            <label 
+              htmlFor="deep-research" 
+              className={`ml-2 font-medium ${preserveOriginalText ? 'text-gray-400' : ''}`}
+            >
+              Use Deep Research mode
+            </label>
+            {useDeepResearch && !preserveOriginalText && (
+              <div className="flex items-center ml-4">
+                <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-md">
+                  Using Perplexity sonar-deep-research
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {useDeepResearch && !preserveOriginalText && (
+            <div className="mt-2 text-sm text-gray-600 pl-7">
+              This mode performs in-depth research with comprehensive academic sources.
+              Note: Deep research may take longer to process.
             </div>
           )}
         </CardContent>
