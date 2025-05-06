@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResearchSummary } from "@shared/schema";
 import CitationsList from "./CitationsList";
@@ -14,6 +14,11 @@ interface OutputSectionProps {
 export default function OutputSection({ isProcessing, researchSummary, setResearchSummary }: OutputSectionProps) {
   const { toast } = useToast();
   const [localSummary, setLocalSummary] = useState<ResearchSummary | null>(researchSummary);
+  
+  // Use useEffect to update local state when props change
+  useEffect(() => {
+    setLocalSummary(researchSummary);
+  }, [researchSummary]);
 
   const copyToClipboard = async () => {
     if (!researchSummary) return;
@@ -204,7 +209,7 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                           description: "Please check back in a few minutes as deep research can take 3-10 minutes to complete.",
                         });
                       }
-                    } catch (error) {
+                    } catch (error: any) {
                       console.error("Error checking for updates:", error);
                       toast({
                         title: "Error checking for updates",
