@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ResearchSummary } from "@shared/schema";
 import CitationsList from "./CitationsList";
 import { useToast } from "@/hooks/use-toast";
-import { checkDeepResearchStatus } from "@/lib/api";
+import { performAgenticDeepResearch } from "@/lib/api";
 
 interface OutputSectionProps {
   isProcessing: boolean;

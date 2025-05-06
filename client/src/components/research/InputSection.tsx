@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResearchForm from "./ResearchForm";
 import { ResearchSummary, GenerateResearchRequest, EnhancedTextResponse } from "@shared/schema";
-import { generateResearch, enhanceTextWithCitations } from "@/lib/api";
+import { generateResearch, enhanceTextWithCitations, performAgenticDeepResearch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface InputSectionProps {
@@ -45,17 +45,33 @@ export default function InputSection({
         };
         
         onGenerationComplete(result);
+      } else if (useDeepResearch) {
+        // Use our new agentic deep research flow with Claude + Perplexity
+        let inputText = "";
+        
+        // Extract the appropriate text based on form data type
+        if (formData.type === "text") {
+          inputText = formData.text;
+        } else if (formData.type === "keywords") {
+          inputText = formData.keywords;
+        } else if (formData.type === "pdf") {
+          // For PDF uploads, we don't have direct access to the content
+          // The content will be extracted on the server side
+          inputText = "PDF document analysis";
+        }
+        
+        if (!inputText || inputText.trim().length === 0) {
+          throw new Error("No input text provided for deep research");
+        }
+        
+        console.log("Starting agentic deep research flow with input:", inputText.substring(0, 100) + "...");
+        
+        // Call the new agentic deep research API
+        const result = await performAgenticDeepResearch(inputText);
+        onGenerationComplete(result);
       } else {
-        // Configure deep research options if enabled
-        const researchOptions = useDeepResearch 
-          ? { 
-              useDeepResearch: true,
-              maxTokens: 800 // Use a higher token limit for deep research
-            } 
-          : undefined;
-          
-        // Call the generateResearch API with options
-        const result = await generateResearch(formData, researchOptions);
+        // Standard research mode without deep research
+        const result = await generateResearch(formData);
         onGenerationComplete(result);
       }
     } catch (error) {

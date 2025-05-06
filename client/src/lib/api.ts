@@ -88,16 +88,19 @@ export async function enhanceTextWithCitations(text: string): Promise<EnhancedTe
 }
 
 /**
- * Check the status of a deep research request
- * @param topic The topic/query that was originally submitted for deep research
- * @returns The latest state of the deep research
+ * Perform agentic deep research using Claude + Perplexity workflow
+ * This makes only a single API call per research request
+ * 
+ * @param text The text or topic to research
+ * @returns A properly formatted research summary with citations
  */
-export async function checkDeepResearchStatus(topic: string): Promise<ResearchSummary> {
+export async function performAgenticDeepResearch(text: string): Promise<ResearchSummary> {
   try {
-    const response = await apiRequest("POST", "/api/research/status", { topic });
+    console.log("Starting agentic deep research for:", text);
+    const response = await apiRequest("POST", "/api/research/agentic-deep", { text });
     return await response.json();
   } catch (error) {
-    console.error("Error checking deep research status:", error);
-    throw new Error(error instanceof Error ? error.message : "Failed to check deep research status");
+    console.error("Error performing agentic deep research:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to perform agentic deep research");
   }
 }

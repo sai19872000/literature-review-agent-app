@@ -85,7 +85,13 @@ async function createOptimizedQuery(userTopic: string): Promise<string> {
       ],
     });
     
-    return response.content[0].text.trim();
+    // Handle potential different response structures
+    if (response.content[0].type === 'text') {
+      return response.content[0].text;
+    } else {
+      // Fallback to string representation if the expected structure isn't found
+      return String(response.content[0]);
+    }
   } catch (error) {
     console.error("Error creating optimized query with Claude:", error);
     // Fallback to original topic if Claude fails
@@ -143,7 +149,13 @@ Please format this as a professional academic paper introduction with proper cit
     });
     
     // Parse Claude's response to extract title and content
-    const fullText = response.content[0].text.trim();
+    let fullText = "";
+    if (response.content[0].type === 'text') {
+      fullText = response.content[0].text.trim();
+    } else {
+      fullText = String(response.content[0]).trim();
+    }
+    
     const titleMatch = fullText.match(/^#\s+(.+?)(?:\n|$)/m);
     const title = titleMatch ? titleMatch[1].trim() : "Research on " + originalTopic;
     
