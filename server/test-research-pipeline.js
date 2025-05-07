@@ -108,7 +108,10 @@ async function performPerplexityResearch(optimizedQuery) {
           }
         ],
         temperature: 0.2,
-        max_tokens: 2048
+        max_tokens: 2048,
+        stream: false,
+        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        return_images: false
       },
       {
         headers: {
