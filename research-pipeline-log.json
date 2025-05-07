@@ -1,0 +1,11 @@
+{
+  "inputQuery": "research how organoids can help do disease modeling",
+  "stages": [
+    {
+      "stage": "Query Optimization",
+      "input": "research how organoids can help do disease modeling",
+      "output": "organoids disease modeling applications advantages limitations three-dimensional cell culture patient-derived organoids drug screening personalized medicine neurodegenerative diseases cancer modeling infectious diseases developmental disorders comparison with traditional cell culture systems ethical considerations technical challenges reproducibility scalability recent advances in organoid technology predictive capabilities clinical translation"
+    }
+  ],
+  "error": "AxiosError: Request failed with status code 400"
+}
