@@ -27,7 +27,7 @@ if (!process.env.ANTHROPIC_API_KEY || !process.env.PERPLEXITY_API_KEY) {
 }
 
 // The test query from user
-const userQuery = "research how organoids can help do disease modeling";
+const userQuery = "research organoids in cancer modeling";
 
 // Log results to file for inspection
 const logFilePath = path.join(__dirname, '../research-pipeline-log.json');
@@ -108,7 +108,7 @@ async function performPerplexityResearch(optimizedQuery) {
           }
         ],
         temperature: 0.2,
-        max_tokens: 2048,
+        max_tokens: 1000,
         stream: false,
         search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
         return_images: false

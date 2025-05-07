@@ -101,7 +101,7 @@ export async function generateResearchSummary(
         temperature,
         max_tokens: maxTokens,
         stream: false,
-        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
         return_images: false
       },
       {
@@ -240,7 +240,7 @@ export async function makePerplexitySonarQuery(
         temperature,
         max_tokens: maxTokens,
         stream: false,
-        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
         return_images: false
       },
       {
