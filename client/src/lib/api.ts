@@ -8,66 +8,51 @@ export async function generateResearch(
   request: GenerateResearchRequest,
   options?: { useDeepResearch?: boolean; maxTokens?: number }
 ): Promise<ResearchSummary> {
-  let endpoint = "";
-  let payload: any = {};
-
-  // Include research options if provided
-  const deepResearchOptions = options?.useDeepResearch 
-    ? { 
-        useDeepResearch: true,
-        maxTokens: options.maxTokens || 800 // Default to 800 tokens for deep research
-      } 
-    : undefined;
-
-  switch (request.type) {
-    case "pdf": {
-      endpoint = "/api/research/pdf";
-      const formData = new FormData();
+  const endpoint = "/api/research/generate";
+  
+  // Add deep research flag if needed
+  const isDeepResearch = options?.useDeepResearch || false;
+  const maxTokens = options?.maxTokens;
+  
+  // Handle PDF uploads with FormData
+  if (request.type === "pdf") {
+    const formData = new FormData();
+    
+    // Add the file
+    if (request.pdfFile) {
       formData.append("file", request.pdfFile);
-      
-      // Add deep research flag if needed
-      if (deepResearchOptions) {
-        formData.append("useDeepResearch", "true");
-        if (deepResearchOptions.maxTokens) {
-          formData.append("maxTokens", deepResearchOptions.maxTokens.toString());
-        }
-      }
-      
-      // Using fetch directly instead of apiRequest for FormData
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error generating research: ${errorText}`);
-      }
-      
-      return await response.json();
     }
-
-    case "text": {
-      endpoint = "/api/research/text";
-      payload = { 
-        text: request.text,
-        ...deepResearchOptions
-      };
-      break;
+    
+    // Add request metadata
+    formData.append("type", "pdf");
+    formData.append("isDeepResearch", isDeepResearch.toString());
+    
+    if (maxTokens) {
+      formData.append("maxTokens", maxTokens.toString());
     }
-
-    case "keywords": {
-      endpoint = "/api/research/keywords";
-      payload = { 
-        keywords: request.keywords,
-        sourcesLimit: request.sourcesLimit,
-        ...deepResearchOptions
-      };
-      break;
+    
+    // Using fetch directly instead of apiRequest for FormData
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error generating research: ${errorText}`);
     }
+    
+    return await response.json();
   }
-
+  
+  // For text and keywords, we can use JSON
+  const payload = {
+    ...request,
+    isDeepResearch,
+    maxTokens
+  };
+  
   const response = await apiRequest("POST", endpoint, payload);
   return await response.json();
 }

@@ -282,6 +282,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unified API endpoint for research generation
+  app.post("/api/research/generate", upload.single("file"), async (req, res) => {
+    try {
+      // Parse and validate the request using the unified schema
+      let validatedData;
+      try {
+        validatedData = generateResearchSchema.parse(req.body);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ message: fromZodError(error).message });
+        }
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      console.log(`Processing research request of type: ${validatedData.type}`);
+      
+      // Extract common options
+      const useDeepResearch = 
+        req.body.isDeepResearch === true || 
+        req.body.isDeepResearch === "true";
+      
+      const maxTokens = req.body.maxTokens ? parseInt(req.body.maxTokens) : undefined;
+      
+      // Process based on research type
+      let summary;
+      
+      switch (validatedData.type) {
+        case "text": {
+          // Generate research from text input
+          summary = await generateResearchSummary(validatedData.text, {
+            useDeepResearch,
+            maxTokens
+          });
+          break;
+        }
+        
+        case "keywords": {
+          // Generate research from keywords
+          const promptText = `Provide a comprehensive literature review on the following topics: ${validatedData.keywords}. 
+            Include up to ${validatedData.sourcesLimit || 10} academic sources.`;
+          
+          summary = await generateResearchSummary(promptText, {
+            useDeepResearch,
+            maxTokens
+          });
+          break;
+        }
+        
+        case "pdf": {
+          // Generate research from uploaded PDF
+          if (!req.file) {
+            return res.status(400).json({ message: "No PDF file uploaded" });
+          }
+          
+          // Extract text from PDF
+          const pdfText = await extractTextFromPDF(req.file.buffer);
+          
+          if (!pdfText || pdfText.trim().length === 0) {
+            return res.status(400).json({ message: "Could not extract text from PDF" });
+          }
+          
+          summary = await generateResearchSummary(pdfText, {
+            useDeepResearch,
+            maxTokens
+          });
+          break;
+        }
+        
+        default:
+          return res.status(400).json({ message: "Invalid research type" });
+      }
+      
+      // Store the research summary in memory storage
+      const savedSummary = await storage.saveResearchSummary(summary);
+      
+      res.json(savedSummary);
+    } catch (error) {
+      console.error("Error generating research:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to generate research" 
+      });
+    }
+  });
+
+  // Simple health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
