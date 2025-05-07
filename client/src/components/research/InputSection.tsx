@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResearchForm from "./ResearchForm";
+import ResearchProgress from "./ResearchProgress";
 import { ResearchSummary, GenerateResearchRequest, EnhancedTextResponse } from "@shared/schema";
 import { generateResearch, enhanceTextWithCitations, performAgenticDeepResearch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -22,11 +23,38 @@ export default function InputSection({
   const [useDeepResearch, setUseDeepResearch] = useState<boolean>(false);
   // Tracking if we're using deep research for the loading state
   const [isUsingDeepResearch, setIsUsingDeepResearch] = useState<boolean>(false);
+  // Research progress tracking
+  const [progressEvents, setProgressEvents] = useState<any[]>([]);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
 
+  // Handle WebSocket progress updates
+  const handleProgressUpdate = (event: any) => {
+    console.log('Progress update received:', event);
+    setProgressEvents(prev => [...prev, event]);
+    
+    // Show the progress component when we start getting updates
+    if (!showProgress) {
+      setShowProgress(true);
+    }
+    
+    // Hide the progress component when we're complete
+    if (event.stage === 'complete' || event.stage === 'error') {
+      // Keep the progress visible for a short time after completion
+      setTimeout(() => {
+        setShowProgress(false);
+        setProgressEvents([]);
+      }, 3000);
+    }
+  };
+  
   const handleSubmit = async (formData: GenerateResearchRequest) => {
     try {
       // Update deep research mode state
       setIsUsingDeepResearch(useDeepResearch);
+      
+      // Reset progress state for new request
+      setProgressEvents([]);
+      setShowProgress(useDeepResearch); // Only show for deep research mode
       
       // Tell parent component we're starting, with deep research flag if needed
       onGenerationStart({ isDeepResearch: useDeepResearch });
@@ -91,6 +119,11 @@ export default function InputSection({
 
   return (
     <section className="lg:w-2/5">
+      {/* Show the progress component when needed */}
+      {showProgress && isProcessing && isUsingDeepResearch && (
+        <ResearchProgress onProgressUpdate={handleProgressUpdate} />
+      )}
+    
       <Card className="mb-8">
         <CardContent className="p-6">
           <h3 className="font-serif text-xl font-bold mb-4 pb-2 border-b border-gray-200">
