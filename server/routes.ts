@@ -9,6 +9,8 @@ import { processDeepResearch } from "./services/deep-research-agent";
 import { fromZodError } from "zod-validation-error";
 import { generateResearchSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
+import { WebSocketServer } from "ws";
+import { WebSocket } from "ws";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -372,5 +374,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store active connections
+  const clients = new Set<WebSocket>();
+  
+  wss.on('connection', (ws) => {
+    console.log('WebSocket client connected');
+    clients.add(ws);
+    
+    // Send welcome message
+    ws.send(JSON.stringify({
+      type: 'connection',
+      message: 'Connected to Research Assistant WebSocket Server',
+      timestamp: new Date().toISOString()
+    }));
+    
+    // Handle incoming messages
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received WebSocket message:', data);
+        
+        // Echo back for testing
+        if (data.type === 'ping') {
+          ws.send(JSON.stringify({
+            type: 'pong',
+            message: 'Pong',
+            timestamp: new Date().toISOString()
+          }));
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+    
+    // Handle disconnection
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+      clients.delete(ws);
+    });
+  });
+  
+  // Export a function to broadcast messages to all connected clients
+  (global as any).broadcastResearchProgress = (data: any) => {
+    const message = JSON.stringify({
+      type: 'research_progress',
+      data,
+      timestamp: new Date().toISOString()
+    });
+    
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  };
+  
   return httpServer;
 }
