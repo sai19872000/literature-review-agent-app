@@ -27,11 +27,37 @@ export async function processDeepResearch(topic: string): Promise<ResearchSummar
   try {
     console.log(`Starting agentic deep research on topic: "${topic}"`);
     
+    // Broadcast starting message
+    broadcastProgress({
+      stage: 'starting',
+      message: `Starting deep research on: "${topic}"`,
+      progress: 0
+    });
+    
     // STEP 1: Use Claude to create an optimized query for Perplexity
+    broadcastProgress({
+      stage: 'query_generation',
+      message: 'Generating optimized research query with Claude...',
+      progress: 10
+    });
+    
     const optimizedQuery = await createOptimizedQuery(topic);
     console.log(`Optimized query created: "${optimizedQuery}"`);
     
+    broadcastProgress({
+      stage: 'query_complete',
+      message: 'Research query optimized successfully',
+      progress: 30,
+      data: { queryPreview: optimizedQuery.substring(0, 100) + '...' }
+    });
+    
     // STEP 2: Make a SINGLE call to Perplexity with the optimized query
+    broadcastProgress({
+      stage: 'research',
+      message: 'Performing deep research with Perplexity...',
+      progress: 40
+    });
+    
     const perplexityResults = await makePerplexitySonarQuery(optimizedQuery, {
       model: "llama-3.1-sonar-small-128k-online",
       maxTokens: 2048,
@@ -45,13 +71,39 @@ export async function processDeepResearch(topic: string): Promise<ResearchSummar
       authors: `Source ${index + 1} Authors`,
     }));
     
+    broadcastProgress({
+      stage: 'research_complete',
+      message: 'Research data collected successfully',
+      progress: 70,
+      data: { 
+        citationsCount: perplexityResults.citations.length,
+        contentPreview: perplexityResults.content.substring(0, 100) + '...'
+      }
+    });
+    
     // STEP 3: Use Claude to structure the final output with proper academic formatting
+    broadcastProgress({
+      stage: 'formatting',
+      message: 'Formatting research summary with Claude...',
+      progress: 80
+    });
+    
     const structuredOutput = await createStructuredOutput(
       topic,
       optimizedQuery,
       perplexityResults.content,
       perplexityCitations
     );
+    
+    broadcastProgress({
+      stage: 'complete',
+      message: 'Research summary generated successfully',
+      progress: 100,
+      data: { 
+        title: structuredOutput.title,
+        citationsCount: structuredOutput.citations.length
+      }
+    });
     
     return {
       title: structuredOutput.title,
@@ -61,7 +113,32 @@ export async function processDeepResearch(topic: string): Promise<ResearchSummar
     };
   } catch (error) {
     console.error("Error in deep research agent flow:", error);
+    
+    // Broadcast error
+    broadcastProgress({
+      stage: 'error',
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      progress: -1
+    });
+    
     throw new Error(`Deep research agent failure: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Helper function to broadcast progress via WebSockets
+function broadcastProgress(data: {
+  stage: string;
+  message: string;
+  progress: number;
+  data?: any;
+}) {
+  try {
+    // Access the global broadcast function we defined in routes.ts
+    if (typeof (global as any).broadcastResearchProgress === 'function') {
+      (global as any).broadcastResearchProgress(data);
+    }
+  } catch (error) {
+    console.error("Error broadcasting progress:", error);
   }
 }
 
