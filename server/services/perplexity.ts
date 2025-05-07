@@ -106,7 +106,7 @@ export async function generateResearchSummary(
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
-        timeout: 90000 // 90 second timeout
+        timeout: 600000 // 10 minute timeout
       }
     );
 
@@ -242,7 +242,7 @@ export async function makePerplexitySonarQuery(
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
-        timeout: 90000 // 90 second timeout
+        timeout: 600000 // 10 minute timeout
       }
     );
 
