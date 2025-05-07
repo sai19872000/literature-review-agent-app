@@ -110,7 +110,7 @@ async function performPerplexityResearch(optimizedQuery) {
         temperature: 0.2,
         max_tokens: 2048,
         stream: false,
-        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
         return_images: false
       },
       {
@@ -273,13 +273,32 @@ async function runTest() {
     // Save all results to file
     results.finalOutput = {
       title: structuredOutput.title,
-      citationsCount: citations.length
+      citationsCount: citations.length,
+      completedAt: new Date().toISOString()
     };
     await saveResults();
     
+    // Print success message with details
+    console.log('\nSuccessfully completed research pipeline:');
+    console.log(`- Title: ${structuredOutput.title}`);
+    console.log(`- Citations: ${citations.length}`);
+    console.log(`- Content length: ${structuredOutput.content.length} characters`);
+    
   } catch (error) {
-    console.error('\nError in pipeline test:', error);
-    results.error = String(error);
+    console.error('\nError in pipeline test:');
+    if (error.response) {
+      console.error('Response error data:', error.response.data);
+      console.error('Response error status:', error.response.status);
+      results.error = `API Error (${error.response.status}): ${JSON.stringify(error.response.data)}`;
+    } else if (error.request) {
+      console.error('Request error (no response):', error.request);
+      results.error = `Request Error: No response received - ${error.message}`;
+    } else {
+      console.error('Error details:', error);
+      results.error = String(error);
+    }
+    
+    results.completedAt = new Date().toISOString();
     await saveResults();
   }
 }

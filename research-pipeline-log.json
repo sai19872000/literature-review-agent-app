@@ -4,8 +4,9 @@
     {
       "stage": "Query Optimization",
       "input": "research how organoids can help do disease modeling",
-      "output": "organoids disease modeling applications advantages limitations three-dimensional cell culture patient-derived organoids drug screening personalized medicine neurodegenerative diseases cancer modeling infectious diseases developmental disorders comparison with traditional cell culture systems ethical considerations technical challenges reproducibility scalability recent advances in organoid technology predictive capabilities clinical translation"
+      "output": "organoids disease modeling applications advantages limitations three-dimensional cell culture patient-derived organoids drug screening personalized medicine neurodegenerative diseases cancer modeling infectious diseases developmental disorders high-throughput screening genetic manipulation techniques comparison with animal models ethical considerations reproducibility challenges future directions clinical translation"
     }
   ],
-  "error": "AxiosError: Request failed with status code 400"
+  "error": "API Error (400): {\"error\":{\"message\":\"Validation error: search_domain_filters must be a valid domain name, but got scholar\",\"type\":\"invalid_search_domain_filter\",\"code\":400}}",
+  "completedAt": "2025-05-07T17:07:33.540Z"
 }

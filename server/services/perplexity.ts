@@ -99,7 +99,10 @@ export async function generateResearchSummary(
           }
         ],
         temperature,
-        max_tokens: maxTokens
+        max_tokens: maxTokens,
+        stream: false,
+        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        return_images: false
       },
       {
         headers: {
@@ -235,7 +238,10 @@ export async function makePerplexitySonarQuery(
           }
         ],
         temperature,
-        max_tokens: maxTokens
+        max_tokens: maxTokens,
+        stream: false,
+        search_domain_filter: ["scholar", "pubmed.gov", "sciencedirect.com"],
+        return_images: false
       },
       {
         headers: {
