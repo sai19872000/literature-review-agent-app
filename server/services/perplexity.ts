@@ -105,7 +105,8 @@ export async function generateResearchSummary(
         headers: {
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
-        }
+        },
+        timeout: 90000 // 90 second timeout
       }
     );
 
@@ -218,6 +219,7 @@ export async function makePerplexitySonarQuery(
     const maxTokens = options.maxTokens || 1500;
     const temperature = options.temperature || 0.2;
     
+    // Set a reasonable timeout for the API request (90 seconds)
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
       {
@@ -239,7 +241,8 @@ export async function makePerplexitySonarQuery(
         headers: {
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
-        }
+        },
+        timeout: 90000 // 90 second timeout
       }
     );
 
