@@ -59,7 +59,7 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
               <div className="bg-accent h-2.5 rounded-full w-3/4 animate-pulse"></div>
             </div>
-            {(researchSummary?.modelUsed === "sonar-deep-research" || researchSummary?.modelUsed === undefined) ? (
+            {isProcessing && researchSummary?.modelUsed === "sonar-deep-research" ? (
               <div>
                 <p className="text-sm text-gray-500 mb-2">
                   <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs mr-2">
@@ -69,6 +69,18 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                 </p>
                 <p className="text-xs text-gray-500 italic">
                   Deep research performs a more comprehensive analysis with academic sources
+                </p>
+              </div>
+            ) : isProcessing && researchSummary?.title === "Enhanced Original Text with Citations" ? (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs mr-2">
+                    Preserve Original Text Mode
+                  </span>
+                  This may take 1-2 minutes to complete
+                </p>
+                <p className="text-xs text-gray-500 italic">
+                  Enhancing your text with authentic citations from academic sources
                 </p>
               </div>
             ) : (
@@ -91,7 +103,7 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
               <i className="fas fa-file-alt text-5xl text-gray-400 mb-4"></i>
               <h3 className="font-serif text-xl font-bold mb-2">No Research Summary</h3>
               <p className="text-gray-600">
-                Upload a PDF, enter text, or search by keywords to generate a research summary
+                Enter text or search by keywords to generate a research summary
               </p>
             </div>
           </CardContent>
@@ -139,11 +151,15 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
                 <span className={`rounded-full px-2 py-1 mr-2 ${
                   researchSummary.modelUsed === "sonar-deep-research" 
                     ? "bg-purple-100 text-purple-700" 
-                    : "bg-blue-100 text-blue-700"
+                    : researchSummary.title === "Enhanced Original Text with Citations"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-blue-100 text-blue-700"
                 }`}>
                   {researchSummary.modelUsed === "sonar-deep-research" 
                     ? "Deep Research Mode" 
-                    : "Standard Research"}
+                    : researchSummary.title === "Enhanced Original Text with Citations"
+                      ? "Preserve Original Text Mode"
+                      : "Standard Research"}
                 </span>
                 <span className="text-gray-500">
                   Generated using {researchSummary.modelUsed}
