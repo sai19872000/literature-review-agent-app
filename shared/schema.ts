@@ -35,10 +35,6 @@ export const researchSummaries = pgTable("research_summaries", {
 // Request schema for generating research
 export const generateResearchSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal("pdf"),
-    pdfFile: z.any(),
-  }),
-  z.object({
     type: z.literal("text"),
     text: z.string().min(10, "Text must be at least 10 characters long"),
   }),

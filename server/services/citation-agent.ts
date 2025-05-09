@@ -1,5 +1,5 @@
 import axios from "axios";
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic from "@anthropic-ai/sdk";
 import { ResearchSummary, Citation } from "@shared/schema";
 
 // Initialize Anthropic client
@@ -42,50 +42,58 @@ interface EnhancedText {
  * @param text The original text to enhance with citations
  * @returns The enhanced text with citations and a list of citations
  */
-export async function enhanceTextWithCitations(text: string): Promise<EnhancedText> {
+export async function enhanceTextWithCitations(
+  text: string,
+): Promise<EnhancedText> {
   try {
-    console.log("Starting citation enhancement process for text of length:", text.length);
-    
+    console.log(
+      "Starting citation enhancement process for text of length:",
+      text.length,
+    );
+
     // Step 1: Identify claims that need citations using Claude
     const fragments = await identifyClaimsNeedingCitations(text);
     console.log(`Identified ${fragments.length} claims needing citations`);
-    
+
     // Step 2: For each claim, find relevant sources using Perplexity
     let enhancedText = text;
     const allCitations: Citation[] = [];
     let citationCount = 0;
-    
+
     for (const fragment of fragments) {
       // Search for original sources for this claim
       const sources = await findOriginalSources(fragment.text);
-      console.log(`Found ${sources.length} sources for claim: "${fragment.text.substring(0, 50)}..."`);
-      
+      console.log(
+        `Found ${sources.length} sources for claim: "${fragment.text.substring(0, 50)}..."`,
+      );
+
       if (sources.length > 0) {
         // Insert citations into the text
         const citationIndices = sources.map(() => ++citationCount);
         const citationText = `[${citationIndices.join(", ")}]`;
-        
+
         // Create citation objects
         const newCitations = sources.map((source, index) => {
           return formatCitation(source, citationIndices[index]);
         });
-        
+
         // Add to our collection
         allCitations.push(...newCitations);
-        
+
         // Replace in the text - careful with indices as we modify the text
         const offset = enhancedText.length - text.length;
         const insertPosition = fragment.endIndex + offset;
-        enhancedText = enhancedText.substring(0, insertPosition) + 
-                      citationText + 
-                      enhancedText.substring(insertPosition);
+        enhancedText =
+          enhancedText.substring(0, insertPosition) +
+          citationText +
+          enhancedText.substring(insertPosition);
       }
     }
-    
+
     return {
       originalText: text,
       enhancedText,
-      citations: allCitations
+      citations: allCitations,
     };
   } catch (error) {
     console.error("Error enhancing text with citations:", error);
@@ -96,7 +104,9 @@ export async function enhanceTextWithCitations(text: string): Promise<EnhancedTe
 /**
  * Step 1: Identify claims in the text that need citations
  */
-async function identifyClaimsNeedingCitations(text: string): Promise<SourceFragment[]> {
+async function identifyClaimsNeedingCitations(
+  text: string,
+): Promise<SourceFragment[]> {
   try {
     const prompt = `
       I want to identify factual claims in the following text that would benefit from academic citations. 
@@ -129,35 +139,33 @@ async function identifyClaimsNeedingCitations(text: string): Promise<SourceFragm
 
     // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
     const response = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 1500,
-      messages: [
-        { role: 'user', content: prompt }
-      ]
+      model: "claude-3-7-sonnet-20250219",
+      max_tokens: 16000,
+      messages: [{ role: "user", content: prompt }],
     });
 
     // Parse the JSON response
     const contentBlock = response.content[0];
-    
-    if (contentBlock.type !== 'text') {
+
+    if (contentBlock.type !== "text") {
       throw new Error("Unexpected response format from Anthropic");
     }
-    
+
     const content = contentBlock.text;
     // Extract JSON from the response (handle potential markdown formatting)
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("Failed to extract JSON from response");
     }
-    
+
     const data = JSON.parse(jsonMatch[0]);
-    
+
     // Convert to our SourceFragment type
     return data.claims.map((claim: any) => ({
       text: claim.text,
       startIndex: claim.startIndex,
       endIndex: claim.endIndex,
-      sources: []
+      sources: [],
     }));
   } catch (error) {
     console.error("Error identifying claims:", error);
@@ -168,13 +176,15 @@ async function identifyClaimsNeedingCitations(text: string): Promise<SourceFragm
 /**
  * Step 2: Find original sources for each claim
  */
-async function findOriginalSources(claimText: string): Promise<CitationSource[]> {
+async function findOriginalSources(
+  claimText: string,
+): Promise<CitationSource[]> {
   try {
     // First we use Perplexity API to search for relevant sources
     const searchResponse = await axios.post(
       PERPLEXITY_API_URL,
       {
-        model: "llama-3.1-sonar-small-128k-online",
+        model: "sonar-pro",
         messages: [
           {
             role: "system",
@@ -188,37 +198,37 @@ async function findOriginalSources(claimText: string): Promise<CitationSource[]>
             5. DOI or URL
             6. Whether it's original research or a review/secondary source
             
-            Respond in JSON format only.`
+            Respond in JSON format only.`,
           },
           {
             role: "user",
-            content: `Find the original academic sources for this claim: "${claimText}". Return the 3 most relevant sources in JSON format.`
-          }
+            content: `Find the original academic sources for this claim: "${claimText}". Return the 3 most relevant sources in JSON format.`,
+          },
         ],
         temperature: 0.1,
-        max_tokens: 1000
+        max_tokens: 8000,
       },
       {
         headers: {
-          "Authorization": `Bearer ${PERPLEXITY_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
+          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      },
     );
 
     // Now we use Claude to analyze these results and pick the best original sources
     const sourceData = searchResponse.data;
-    
+
     // Extract the content
     const perplexityContent = sourceData.choices[0].message.content;
-    
+
     // Use Claude to process and extract the original sources
     const response = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 1000,
+      model: "claude-3-7-sonnet-20250219",
+      max_tokens: 16000,
       messages: [
-        { 
-          role: 'user', 
+        {
+          role: "user",
           content: `
           Analyze these search results about the claim: "${claimText}"
           
@@ -244,27 +254,26 @@ async function findOriginalSources(claimText: string): Promise<CitationSource[]>
           }
           
           Return the JSON object only with no other text.
-          `
-        }
-      ]
+          `,
+        },
+      ],
     });
 
     // Extract and parse the JSON from response
     const contentBlock = response.content[0];
-    
-    if (contentBlock.type !== 'text') {
-      return [];  // If not a text block, return empty array
+
+    if (contentBlock.type !== "text") {
+      return []; // If not a text block, return empty array
     }
-    
+
     const content = contentBlock.text;
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return []; // If no matches, return empty array
     }
-    
+
     const data = JSON.parse(jsonMatch[0]);
     return data.sources;
-    
   } catch (error) {
     console.error("Error finding original sources:", error);
     return []; // Return empty array on error
@@ -279,15 +288,15 @@ function formatCitation(source: CitationSource, index: number): Citation {
   const year = source.year || "n.d.";
   const title = source.title;
   const journal = source.journal || "";
-  
+
   let citationText = `${authors} (${year}). ${title}.`;
   if (journal) {
     citationText += ` ${journal}.`;
   }
-  
+
   return {
     authors: `${authors} (${year})`,
     text: citationText,
-    url: source.url || source.doi || undefined
+    url: source.url || source.doi || undefined,
   };
 }

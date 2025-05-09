@@ -1,9 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import multer from "multer";
 import { generateResearchSummary } from "./services/perplexity";
-import { extractTextFromPDF } from "./services/pdf-extractor";
 import { enhanceTextWithCitations } from "./services/citation-agent";
 import { processDeepResearch } from "./services/deep-research-agent";
 import { fromZodError } from "zod-validation-error";
@@ -11,21 +9,6 @@ import { generateResearchSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
 import { WebSocketServer } from "ws";
 import { WebSocket } from "ws";
-
-// Configure multer for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB max file size
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === "application/pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF files are allowed"));
-    }
-  },
-});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint for Perplexity API
@@ -89,45 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API endpoint for generating research summary from PDF
-  app.post("/api/research/pdf", upload.single("file"), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: "No PDF file uploaded" });
-      }
-
-      // Extract text from PDF
-      const pdfText = await extractTextFromPDF(req.file.buffer);
-      
-      if (!pdfText || pdfText.trim().length === 0) {
-        return res.status(400).json({ message: "Could not extract text from PDF" });
-      }
-      
-      // Check if deep research mode is requested
-      const useDeepResearch = req.body.useDeepResearch === "true";
-      const maxTokens = req.body.maxTokens ? parseInt(req.body.maxTokens) : undefined;
-      
-      if (useDeepResearch) {
-        console.log("Using deep research mode for PDF with max tokens:", maxTokens || "default");
-      }
-
-      // Generate research summary using Perplexity API
-      const summary = await generateResearchSummary(pdfText, {
-        useDeepResearch,
-        maxTokens
-      });
-      
-      // Store the research summary in memory storage
-      const savedSummary = await storage.saveResearchSummary(summary);
-      
-      res.json(savedSummary);
-    } catch (error) {
-      console.error("Error processing PDF:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to process PDF" 
-      });
-    }
-  });
+  // PDF endpoint removed in UI redesign
 
   // API endpoint for generating research summary from text
   app.post("/api/research/text", async (req, res) => {
@@ -285,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Unified API endpoint for research generation
-  app.post("/api/research/generate", upload.single("file"), async (req, res) => {
+  app.post("/api/research/generate", async (req, res) => {
     try {
       // Parse and validate the request using the unified schema
       let validatedData;
@@ -326,26 +271,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             Include up to ${validatedData.sourcesLimit || 10} academic sources.`;
           
           summary = await generateResearchSummary(promptText, {
-            useDeepResearch,
-            maxTokens
-          });
-          break;
-        }
-        
-        case "pdf": {
-          // Generate research from uploaded PDF
-          if (!req.file) {
-            return res.status(400).json({ message: "No PDF file uploaded" });
-          }
-          
-          // Extract text from PDF
-          const pdfText = await extractTextFromPDF(req.file.buffer);
-          
-          if (!pdfText || pdfText.trim().length === 0) {
-            return res.status(400).json({ message: "Could not extract text from PDF" });
-          }
-          
-          summary = await generateResearchSummary(pdfText, {
             useDeepResearch,
             maxTokens
           });

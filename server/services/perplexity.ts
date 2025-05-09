@@ -28,11 +28,7 @@ interface PerplexityResponse {
 }
 
 // Available Perplexity models
-type PerplexityModel =
-  | "llama-3.1-sonar-small-128k-online"
-  | "llama-3.1-sonar-large-128k-online"
-  | "llama-3.1-sonar-huge-128k-online"
-  | "sonar-deep-research";
+type PerplexityModel = "sonar-pro" | "sonar-deep-research";
 
 /**
  * Configuration options for Perplexity API calls
@@ -71,7 +67,7 @@ export async function generateResearchSummary(
 
     const model = useDeepResearch
       ? "sonar-deep-research"
-      : options.model || "llama-3.1-sonar-huge-128k-online";
+      : options.model || "sonar-pro";
 
     const maxTokens =
       options.maxTokens || (model === "sonar-deep-research" ? 500 : 150);
@@ -240,8 +236,8 @@ export async function makePerplexitySonarQuery(
       `Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`,
     );
 
-    const model = options.model || "llama-3.1-8b-system";
-    const maxTokens = options.maxTokens || 16000;
+    const model = options.model || "sonar-pro";
+    const maxTokens = options.maxTokens || 8000;
     const temperature = options.temperature || 0.2;
 
     // Set a reasonable timeout for the API request (90 seconds)
@@ -326,17 +322,24 @@ export function processCitations(citationUrls: string[]): Citation[] {
       .split(".")
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
-    
+
     // Extract additional citation information when possible
     let text = `${url}`;
-    
+
     // Parse URLs from different sources to extract more information
-    if (url.includes("pubmed.ncbi.nlm.nih.gov") || url.includes("pmc.ncbi.nlm.nih.gov")) {
+    if (
+      url.includes("pubmed.ncbi.nlm.nih.gov") ||
+      url.includes("pmc.ncbi.nlm.nih.gov")
+    ) {
       // Try to format PubMed/PMC citations more academically
       const articleMatch = url.match(/PMC(\d+)/i);
       const pubmedMatch = url.match(/pubmed\/(\d+)/i);
-      const articleId = articleMatch ? articleMatch[1] : (pubmedMatch ? pubmedMatch[1] : null);
-      
+      const articleId = articleMatch
+        ? articleMatch[1]
+        : pubmedMatch
+          ? pubmedMatch[1]
+          : null;
+
       if (articleId) {
         text = `PubMed/PMC Article ID: ${articleId}. Retrieved from ${url}`;
       }
