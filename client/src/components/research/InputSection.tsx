@@ -193,20 +193,7 @@ export default function InputSection({
             </select>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="summary-length" className="block mb-2 font-medium">
-              Summary Length
-            </label>
-            <select
-              id="summary-length"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-              defaultValue="medium"
-            >
-              <option value="short">Brief (250 words)</option>
-              <option value="medium">Standard (500 words)</option>
-              <option value="long">Comprehensive (1000 words)</option>
-            </select>
-          </div>
+          {/* Summary Length selector removed - agents always generate comprehensive reports */}
 
           {/* Hidden default options that are always enabled */}
           <input
