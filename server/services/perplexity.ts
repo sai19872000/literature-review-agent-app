@@ -240,7 +240,7 @@ export async function makePerplexitySonarQuery(
       `Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`,
     );
 
-    const model = options.model || "llama-3.1-sonar-huge-128k-online";
+    const model = options.model || "llama-3.1-8b-system";
     const maxTokens = options.maxTokens || 16000;
     const temperature = options.temperature || 0.2;
 
