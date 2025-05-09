@@ -11,6 +11,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import {
   generateResearchSummary,
   makePerplexitySonarQuery,
+  processCitations,
 } from "./perplexity";
 import { ResearchSummary, Citation } from "@shared/schema";
 
@@ -69,14 +70,8 @@ export async function processDeepResearch(
       temperature: 0.2,
     });
 
-    // Extract citations from Perplexity results
-    const perplexityCitations = perplexityResults.citations.map(
-      (url, index) => ({
-        url,
-        text: `Source ${index + 1}`,
-        authors: `Source ${index + 1} Authors`,
-      }),
-    );
+    // Process citations using the enhanced citation processor
+    const perplexityCitations = processCitations(perplexityResults.citations);
 
     broadcastProgress({
       stage: "research_complete",

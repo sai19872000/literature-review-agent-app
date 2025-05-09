@@ -311,8 +311,9 @@ export async function makePerplexitySonarQuery(
 
 /**
  * Process citation URLs from Perplexity API into structured Citation objects
+ * Exported so it can be used by other services
  */
-function processCitations(citationUrls: string[]): Citation[] {
+export function processCitations(citationUrls: string[]): Citation[] {
   return citationUrls.map((url, index) => {
     // Extract domain name for a basic author reference
     const domainMatch = url.match(/https?:\/\/(?:www\.)?([^\/]+)/i);
@@ -325,11 +326,35 @@ function processCitations(citationUrls: string[]): Citation[] {
       .split(".")
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
+    
+    // Extract additional citation information when possible
+    let text = `${url}`;
+    
+    // Parse URLs from different sources to extract more information
+    if (url.includes("pubmed.ncbi.nlm.nih.gov") || url.includes("pmc.ncbi.nlm.nih.gov")) {
+      // Try to format PubMed/PMC citations more academically
+      const articleMatch = url.match(/PMC(\d+)/i);
+      const pubmedMatch = url.match(/pubmed\/(\d+)/i);
+      const articleId = articleMatch ? articleMatch[1] : (pubmedMatch ? pubmedMatch[1] : null);
+      
+      if (articleId) {
+        text = `PubMed/PMC Article ID: ${articleId}. Retrieved from ${url}`;
+      }
+    } else if (url.includes("doi.org")) {
+      // Format DOI citations
+      const doiMatch = url.match(/doi\.org\/(.+)$/i);
+      if (doiMatch) {
+        text = `DOI: ${doiMatch[1]}. Retrieved from ${url}`;
+      }
+    } else {
+      // Generic formatting for other URLs
+      text = `Retrieved from ${url}`;
+    }
 
     // Create a citation with domain as author
     return {
       authors: `${formattedDomain} (n.d.)`,
-      text: `Resource ${index + 1}: ${url.split("/").slice(0, 3).join("/")}`,
+      text: text,
       url,
     };
   });
