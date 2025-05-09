@@ -28,9 +28,9 @@ interface PerplexityResponse {
 }
 
 // Available Perplexity models
-type PerplexityModel = 
+type PerplexityModel =
   | "llama-3.1-sonar-small-128k-online"
-  | "llama-3.1-sonar-large-128k-online" 
+  | "llama-3.1-sonar-large-128k-online"
   | "llama-3.1-sonar-huge-128k-online"
   | "sonar-deep-research";
 
@@ -46,40 +46,44 @@ interface PerplexityOptions {
 
 /**
  * Generates a research summary using Perplexity Sonar AI API
- * 
+ *
  * @param text The text content to analyze and summarize
  * @param options Configuration options for the API call
  * @returns A research summary with citations
  */
 export async function generateResearchSummary(
-  text: string, 
-  options: PerplexityOptions = {}
+  text: string,
+  options: PerplexityOptions = {},
 ): Promise<ResearchSummary> {
   try {
     const apiKey = process.env.PERPLEXITY_API_KEY;
-    
+
     if (!apiKey) {
       throw new Error("PERPLEXITY_API_KEY environment variable is not set");
     }
 
     // Default to "llama-3.1-sonar-small-128k-online" unless deep research is enabled
     // Convert to boolean in case the value is a string "true" from form data
-    const useDeepResearch = 
-      options.useDeepResearch === true || 
-      options.useDeepResearch === "true";
-    
+    const useDeepResearch =
+      options.useDeepResearch === true || options.useDeepResearch === "true";
+
     console.log(`Deep research requested: ${useDeepResearch}`);
-    
+
     const model = useDeepResearch
-      ? "sonar-deep-research" 
-      : (options.model || "llama-3.1-sonar-small-128k-online");
-    
-    const maxTokens = options.maxTokens || (model === "sonar-deep-research" ? 500 : 150);
+      ? "sonar-deep-research"
+      : options.model || "llama-3.1-sonar-huge-128k-online";
+
+    const maxTokens =
+      options.maxTokens || (model === "sonar-deep-research" ? 500 : 150);
     const temperature = options.temperature || 0.2;
-    
-    console.log(`Calling Perplexity API with model: ${model}, text length: ${text.length}`);
+
+    console.log(
+      `Calling Perplexity API with model: ${model}, text length: ${text.length}`,
+    );
     console.log(`Using maxTokens: ${maxTokens}, temperature: ${temperature}`);
-    console.log(`Deep research mode enabled: ${useDeepResearch ? 'YES' : 'NO'}`);
+    console.log(
+      `Deep research mode enabled: ${useDeepResearch ? "YES" : "NO"}`,
+    );
     console.log(`Options received:`, JSON.stringify(options, null, 2));
 
     const response = await axios.post(
@@ -89,51 +93,62 @@ export async function generateResearchSummary(
         messages: [
           {
             role: "system",
-            content: model === "sonar-deep-research" 
-              ? "You are a research assistant providing in-depth literature reviews with comprehensive citations. Focus on academic sources and peer-reviewed research."
-              : "Be precise and concise in creating a literature review."
+            content:
+              model === "sonar-deep-research"
+                ? "You are a research assistant providing in-depth literature reviews with comprehensive citations. Focus on academic sources and peer-reviewed research."
+                : "Be precise and concise in creating a literature review.",
           },
           {
             role: "user",
-            content: text
-          }
+            content: text,
+          },
         ],
         temperature,
         max_tokens: maxTokens,
         stream: false,
-        search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
-        return_images: false
+        search_domain_filter: [
+          "ncbi.nlm.nih.gov",
+          "scholar.google.com",
+          "sciencedirect.com",
+        ],
+        return_images: false,
       },
       {
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
-        timeout: 600000 // 10 minute timeout
-      }
+        timeout: 600000, // 10 minute timeout
+      },
     );
 
     const perplexityResponse = response.data as PerplexityResponse;
-    console.log("Perplexity API response:", JSON.stringify(perplexityResponse, null, 2));
-    
-    if (!perplexityResponse.choices || perplexityResponse.choices.length === 0) {
+    console.log(
+      "Perplexity API response:",
+      JSON.stringify(perplexityResponse, null, 2),
+    );
+
+    if (
+      !perplexityResponse.choices ||
+      perplexityResponse.choices.length === 0
+    ) {
       throw new Error("Invalid response from Perplexity API");
     }
 
     // Get raw content from API response
     let content = perplexityResponse.choices[0].message.content;
-    
+
     // Process content when it includes thinking tags for deep research mode
     if (content.includes("<think>")) {
       console.log("Detected thinking output from deep research mode...");
-      
+
       // Extract the thinking content to display as intermediary output
       let thinkingContent = "";
       const thinkMatch = content.match(/<think>([\s\S]*?)(<\/think>|$)/);
-      
+
       if (thinkMatch && thinkMatch[1]) {
         thinkingContent = thinkMatch[1].trim();
-        
+
         // Format the thinking output for display
         if (thinkingContent.length > 0) {
           // Keep the thinking content but format it for display
@@ -142,7 +157,7 @@ export async function generateResearchSummary(
             <h3 class="text-purple-800 font-medium mb-2">🧠 Deep Research in Progress</h3>
             <p class="text-sm text-purple-700 mb-4">The AI is currently analyzing academic sources. This preview shows its thinking process and will be replaced with the final research when complete.</p>
             <div class="text-sm text-gray-700 max-h-[300px] overflow-y-auto">
-              ${thinkingContent.slice(0, 2000)}${thinkingContent.length > 2000 ? '...' : ''}
+              ${thinkingContent.slice(0, 2000)}${thinkingContent.length > 2000 ? "..." : ""}
             </div>
           </div>
 
@@ -166,13 +181,13 @@ export async function generateResearchSummary(
         </div>`;
       }
     }
-    
+
     // Extract title from content
-    const titleMatch = content.match(/^#+ (.+)$/m) || 
-                       content.match(/^(.+?)(?:\n|$)/);
-                     
+    const titleMatch =
+      content.match(/^#+ (.+)$/m) || content.match(/^(.+?)(?:\n|$)/);
+
     const title = titleMatch ? titleMatch[1].trim() : "Literature Review";
-    
+
     // Process citations from the API response
     const citations = processCitations(perplexityResponse.citations || []);
 
@@ -181,17 +196,22 @@ export async function generateResearchSummary(
       title,
       content,
       citations,
-      modelUsed: perplexityResponse.model || model
+      modelUsed: perplexityResponse.model || model,
     };
-    
+
     console.log("Generated research summary with title:", title);
     return summary;
   } catch (error) {
     console.error("Error calling Perplexity API:", error);
     if (axios.isAxiosError(error)) {
       const responseData = error.response?.data;
-      console.error("API error details:", JSON.stringify(responseData, null, 2));
-      throw new Error(`Perplexity API error: ${responseData?.error?.message || error.message}`);
+      console.error(
+        "API error details:",
+        JSON.stringify(responseData, null, 2),
+      );
+      throw new Error(
+        `Perplexity API error: ${responseData?.error?.message || error.message}`,
+      );
     }
     throw error;
   }
@@ -200,28 +220,30 @@ export async function generateResearchSummary(
 /**
  * Direct call to Perplexity API without additional processing
  * Used for the agentic flow with Claude
- * 
+ *
  * @param query The query to send to Perplexity
  * @param options API options
  * @returns The raw Perplexity response content and citations
  */
 export async function makePerplexitySonarQuery(
   query: string,
-  options: PerplexityOptions = {}
-): Promise<{ content: string, citations: string[] }> {
+  options: PerplexityOptions = {},
+): Promise<{ content: string; citations: string[] }> {
   try {
     const apiKey = process.env.PERPLEXITY_API_KEY;
-    
+
     if (!apiKey) {
       throw new Error("PERPLEXITY_API_KEY environment variable is not set");
     }
-    
-    console.log(`Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`);
-    
-    const model = options.model || "llama-3.1-sonar-small-128k-online";
-    const maxTokens = options.maxTokens || 1500;
+
+    console.log(
+      `Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`,
+    );
+
+    const model = options.model || "llama-3.1-sonar-huge-128k-online";
+    const maxTokens = options.maxTokens || 16000;
     const temperature = options.temperature || 0.2;
-    
+
     // Set a reasonable timeout for the API request (90 seconds)
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
@@ -230,45 +252,58 @@ export async function makePerplexitySonarQuery(
         messages: [
           {
             role: "system",
-            content: "You are a research assistant providing detailed information. Include citations to all sources."
+            content:
+              "You are a research assistant providing detailed information. Include citations to all sources.",
           },
           {
             role: "user",
-            content: query
-          }
+            content: query,
+          },
         ],
         temperature,
         max_tokens: maxTokens,
         stream: false,
-        search_domain_filter: ["ncbi.nlm.nih.gov", "scholar.google.com", "sciencedirect.com"],
-        return_images: false
+        search_domain_filter: [
+          "ncbi.nlm.nih.gov",
+          "scholar.google.com",
+          "sciencedirect.com",
+        ],
+        return_images: false,
       },
       {
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
-        timeout: 600000 // 10 minute timeout
-      }
+        timeout: 600000, // 10 minute timeout
+      },
     );
 
     const perplexityResponse = response.data as PerplexityResponse;
-    
-    if (!perplexityResponse.choices || perplexityResponse.choices.length === 0) {
+
+    if (
+      !perplexityResponse.choices ||
+      perplexityResponse.choices.length === 0
+    ) {
       throw new Error("Invalid response from Perplexity API");
     }
 
     // Return the raw content and citations without processing
     return {
       content: perplexityResponse.choices[0].message.content,
-      citations: perplexityResponse.citations || []
+      citations: perplexityResponse.citations || [],
     };
   } catch (error) {
     console.error("Error making direct Perplexity query:", error);
     if (axios.isAxiosError(error)) {
       const responseData = error.response?.data;
-      console.error("API error details:", JSON.stringify(responseData, null, 2));
-      throw new Error(`Perplexity API error: ${responseData?.error?.message || error.message}`);
+      console.error(
+        "API error details:",
+        JSON.stringify(responseData, null, 2),
+      );
+      throw new Error(
+        `Perplexity API error: ${responseData?.error?.message || error.message}`,
+      );
     }
     throw error;
   }
@@ -281,21 +316,21 @@ function processCitations(citationUrls: string[]): Citation[] {
   return citationUrls.map((url, index) => {
     // Extract domain name for a basic author reference
     const domainMatch = url.match(/https?:\/\/(?:www\.)?([^\/]+)/i);
-    const domain = domainMatch 
-      ? domainMatch[1].replace(/\.(com|org|edu|gov|net)$/i, '')
+    const domain = domainMatch
+      ? domainMatch[1].replace(/\.(com|org|edu|gov|net)$/i, "")
       : "Unknown Source";
-    
+
     // Format domain for better readability as author
     const formattedDomain = domain
-      .split('.')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-    
+      .split(".")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+
     // Create a citation with domain as author
     return {
       authors: `${formattedDomain} (n.d.)`,
-      text: `Resource ${index + 1}: ${url.split('/').slice(0, 3).join('/')}`,
-      url
+      text: `Resource ${index + 1}: ${url.split("/").slice(0, 3).join("/")}`,
+      url,
     };
   });
 }
