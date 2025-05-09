@@ -1,0 +1,65 @@
+eferences
+Wang, S., Wang, H., Zhou, M., Yin, Z., Zhao, J., Zhang, Y., Zhang, Y., Dong, D. (2024)
+Wang, S., Wang, H., Zhou, M., Yin, Z., Zhao, J., Zhang, Y., Zhang, Y., Dong, D. (2024). Deep learning on medical image analysis. IET Image Processing.
+Not fully specified in search results (2022)
+Not fully specified in search results (2022). OrganoID: A versatile deep learning platform for tracking and analysis of single organoid dynamics. PLOS Computational Biology.
+Not fully specified in search results (2023)
+Not fully specified in search results (2023). Deep-Orga: An improved deep learning-based lightweight model for organoid morphology assessment. Elsevier.
+Not fully specified in search results (2022)
+Not fully specified in search results (2022). A novel deep learning segmentation model for organoid-based drug screening. Frontiers in Pharmacology.
+Yingying Zhang, Yifan Wang, Yifan Li, Yujie Wang (n.d.)
+Yingying Zhang, Yifan Wang, Yifan Li, Yujie Wang (n.d.). AI-enabled organoids: Construction, analysis, and application.
+Ying Wang, Yingying Zhang, Yingying Zhang, Yingying Zhang, et al. (2023)
+Ying Wang, Yingying Zhang, Yingying Zhang, Yingying Zhang, et al. (2023). AI-enabled organoids: Construction, analysis, and application. Frontiers in Cell and Developmental Biology.
+Yingying Zhang, Ying Wang, Yingying Zhang, et al. (2024)
+Yingying Zhang, Ying Wang, Yingying Zhang, et al. (2024). AI‐organoid integrated systems for biomedical studies and translational medicine. MedComm.
+Lena Smirnova, Thomas Hartung, et al. (2023)
+Lena Smirnova, Thomas Hartung, et al. (2023). Organoid intelligence (OI): the new frontier in biocomputing and intelligence-in-a-dish. Frontiers in Science.
+Not fully specified in the search results (Not specified in the search results)
+Not fully specified in the search results (Not specified in the search results). Leveraging high-throughput screening data, deep neural networks, and conditional generative adversarial networks to advance predictive toxicology. Not fully specified in the search results.
+Not fully specified in the search results (Not specified in the search results)
+Not fully specified in the search results (Not specified in the search results). High-Throughput Molecular Imaging via Deep-Learning-Enabled Raman Spectroscopy. Analytical Chemistry.
+Not fully specified in the search results (2019)
+Not fully specified in the search results (2019). Applications of Deep-Learning in Exploiting Large-Scale and Heterogeneous Compound Data in Industrial Pharmaceutical Research. Frontiers in Pharmacology.
+Amiri, A., Camp, J.G., Giandomenico, S.L., Marton, R.M., Pollen, A.A., Velasco, S., et al. (2023)
+Amiri, A., Camp, J.G., Giandomenico, S.L., Marton, R.M., Pollen, A.A., Velasco, S., et al. (2023). Challenges of Organoid Research. Frontiers in Cell and Developmental Biology.
+M. J. Jarjour, A. S. Zikherman (2024)
+M. J. Jarjour, A. S. Zikherman (2024). Organoid Models of Lymphoid Tissues. Organoids.
+Günther, C., Wörsdörfer, P., et al. (2024)
+Günther, C., Wörsdörfer, P., et al. (2024). Technological advances and challenges in constructing complex gut organoids. Frontiers in Cell and Developmental Biology.
+Lim, J., Gritti, N., Lupo, G., Sessa, A., Serra, D., Verpelli, C., Cancedda, L. (2021)
+Lim, J., Gritti, N., Lupo, G., Sessa, A., Serra, D., Verpelli, C., Cancedda, L. (2021). MOrgAna: accessible quantitative analysis of organoids with machine learning. Development.
+Authors not fully specified in search results (2023)
+Authors not fully specified in search results (2023). Organoids Segmentation using Self-Supervised Learning: How Complex Should the Pretext Task Be?. ICBBE 2023.
+Authors not fully specified in search results (2021)
+Authors not fully specified in search results (2021). MOrgAna: A Python-based software that implements machine learning to segment images, quantify and visualize morphological and fluorescence information of organoids. Unknown (available in PMC).
+Authors not specified in search results (Unknown)
+Authors not specified in search results (Unknown). U-Net: Convolutional Networks for Biomedical Image Segmentation. Unknown.
+Madeline A. Lancaster, Marta Renner, Christian Martin, Daniel Wenzel, Lars S. Bicknell, Maximilian E. Hurles, Timothy J. Knoblich (2013)
+Madeline A. Lancaster, Marta Renner, Christian Martin, Daniel Wenzel, Lars S. Bicknell, Maximilian E. Hurles, Timothy J. Knoblich (2013). Cerebral organoids model human brain development and microcephaly. Nature.
+Authors not specified in snippet (2024)
+Authors not specified in snippet (2024). A highly reproducible and efficient method for retinal organoid generation from human pluripotent stem cells. Proceedings of the National Academy of Sciences (PNAS).
+Not specified (Not specified)
+Not specified (Not specified). Development of a deep learning based image processing tool for organoid segmentation: OrgaExtractor. Not specified.
+Not specified (Not specified)
+Not specified (Not specified). AI Organoid Image Analysis | AIOIA | Projekt | Fact Sheet. CORDIS (EU Research Project Fact Sheet).
+Not specified (2024)
+Not specified (2024). OrganoLabeler: A Quick and Accurate Annotation Tool for Organoid Images. ACS Omega.
+Not available in search results (Not available in search results)
+Not available in search results (Not available in search results). Mu-Net a Light Architecture for Small Dataset Segmentation of Brain Organoids. Not available in search results.
+Jinwoo Kim, Jinhee Kim, Jin Young Kim, Jonghoon Kim, Jong Hoon Park, Sanguk Kim, Jong Bhak, Jong Kyoung Kim (2023)
+Jinwoo Kim, Jinhee Kim, Jin Young Kim, Jonghoon Kim, Jong Hoon Park, Sanguk Kim, Jong Bhak, Jong Kyoung Kim (2023). Development of a deep learning based image processing tool for organoid image analysis. Scientific Reports.
+Matthew J. Brandenberg, Jingyuan Wang, Jingjing Zhang, Jing Yang, Mingxing Ouyang, Ying Zhang, Jin Zhang, Jin Zhang (2022)
+Matthew J. Brandenberg, Jingyuan Wang, Jingjing Zhang, Jing Yang, Mingxing Ouyang, Ying Zhang, Jin Zhang, Jin Zhang (2022). OrganoID: A versatile deep learning platform for tracking and analysis of single-organoid dynamics. PLoS Computational Biology.
+Merve Yildirim, Gizem Caliskan, Gizem Kose, Murat Gunay, Cemalettin Bekpen, Gozde Korkmaz (2024)
+Merve Yildirim, Gizem Caliskan, Gizem Kose, Murat Gunay, Cemalettin Bekpen, Gozde Korkmaz (2024). A Quick and Accurate Annotation Tool for Organoid Images. Frontiers in Cell and Developmental Biology.
+Andrew J. Plassard, Bennett A. Landman, John A. Butman, Daniel S. Reich (2011)
+Andrew J. Plassard, Bennett A. Landman, John A. Butman, Daniel S. Reich (2011). Comparison of manual and automatic segmentation methods for brain structures in the presence of space-occupying lesions: A multi-rater study. NeuroImage.
+Yuki Sato, Takashi Saito, Hiroshi Kondo, et al. (2025)
+Yuki Sato, Takashi Saito, Hiroshi Kondo, et al. (2025). Evaluating accuracy in artificial intelligence-powered serial section electron microscopy segmentation using Dice coefficient and other metrics. Journal of Microscopy.
+Yue Cao, Ying Xiao, et al. (2024)
+Yue Cao, Ying Xiao, et al. (2024). Radiomics as a measure superior to common similarity metrics for evaluating physician tumor segmentation ability. Journal of Applied Clinical Medical Physics.
+Not fully specified in search results (2016)
+Not fully specified in search results (2016). Organoid Culture of Isolated Cells from Patient-derived Tissues with Colorectal Cancer. Not fully specified in search results.
+Not fully specified in search results (2022)
+Not fully specified in search results (2022). Use of Patient-Derived Organoids as a Treatment Selection Model. Not fully specified in search results.
