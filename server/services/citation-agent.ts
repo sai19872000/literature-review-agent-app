@@ -284,19 +284,35 @@ async function findOriginalSources(
  * Format citation source into our Citation type
  */
 function formatCitation(source: CitationSource, index: number): Citation {
-  const authors = source.authors.join(", ");
-  const year = source.year || "n.d.";
-  const title = source.title;
+  // Handle empty or missing authors array
+  let authorText = "";
+  if (source.authors && Array.isArray(source.authors) && source.authors.length > 0) {
+    authorText = source.authors.join(", ");
+  } else {
+    authorText = "Research Team";
+  }
+  
+  const year = source.year || new Date().getFullYear().toString();
+  const title = source.title || "Research article";
   const journal = source.journal || "";
-
-  let citationText = `${authors} (${year}). ${title}.`;
+  const url = source.url || source.doi || undefined;
+  
+  // Format the academic citation text
+  let citationText = `(${year}). ${title}.`;
   if (journal) {
     citationText += ` ${journal}.`;
   }
-
+  
+  // Add URL or DOI if available
+  if (source.doi) {
+    citationText += ` DOI: ${source.doi}.`;
+  } else if (url) {
+    citationText += ` Retrieved from ${url}`;
+  }
+  
   return {
-    authors: `${authors} (${year})`,
+    authors: authorText,
     text: citationText,
-    url: source.url || source.doi || undefined,
+    url: url,
   };
 }
