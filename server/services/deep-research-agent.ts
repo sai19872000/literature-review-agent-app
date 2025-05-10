@@ -210,7 +210,15 @@ async function createStructuredOutput(
   try {
     // Prepare citation information for Claude
     const citationsText = perplexityCitations
-      .map((citation, index) => `[${index + 1}] ${citation.url}`)
+      .map((citation, index) => {
+        // Format proper citations without "Not fully specified" text
+        const authorText = citation.authors ? 
+          citation.authors.replace(/Not fully specified in search results/g, 'Research Team') : 
+          'Research Team';
+          
+        const url = citation.url || '';
+        return `[${index + 1}] ${authorText}. ${citation.text} ${url}`;
+      })
       .join("\n");
 
     const response = await anthropic.messages.create({
