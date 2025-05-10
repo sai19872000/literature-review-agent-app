@@ -176,22 +176,7 @@ export default function InputSection({
             Configuration
           </h3>
 
-          <div className="mb-4">
-            <label htmlFor="citation-style" className="block mb-2 font-medium">
-              Citation Style
-            </label>
-            <select
-              id="citation-style"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-              defaultValue="apa"
-            >
-              <option value="apa">APA 7th Edition</option>
-              <option value="mla">MLA 9th Edition</option>
-              <option value="chicago">Chicago 17th Edition</option>
-              <option value="harvard">Harvard</option>
-              <option value="ieee">IEEE</option>
-            </select>
-          </div>
+          {/* Citation style selector removed - using simplified citation format */}
 
           {/* Summary Length selector removed - agents always generate comprehensive reports */}
 
