@@ -276,7 +276,12 @@ async function createStructuredOutput(
       Structure the output as a cohesive paper introduction that explains the topic thoroughly.
       Use the citations provided by properly referencing them as [1], [2], etc. at appropriate places.
       Do not add any citations that are not in the provided list.
-      Format the content cleanly with proper paragraphs and spacing.`,
+      Format the content cleanly with proper paragraphs and spacing.
+      
+      CRITICALLY IMPORTANT: Before finalizing your response, verify that all citation numbers in the text match the available citations. 
+      If you reference [20] in the text, make sure citation #20 exists in the provided citation list.
+      Check every citation number in your text and ensure there is a matching reference in the list.
+      If you find any citation numbers that exceed the available citations, replace them with appropriate citation numbers from the available list.`,
       messages: [
         {
           role: "user",

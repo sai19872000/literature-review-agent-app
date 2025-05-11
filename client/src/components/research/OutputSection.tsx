@@ -41,10 +41,20 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
       if (seenTitles.has(title) || seenUrls.has(url)) {
         // Find which index this duplicate maps to
         for (let i = 0; i < uniqueCitations.length; i++) {
-          const existingCleanText = uniqueCitations[i].text || "";
+          // Check for null/undefined before accessing properties
+          if (!uniqueCitations[i]) continue;
+          
+          // Get text with proper type checking
+          const existingCitation = uniqueCitations[i];
+          const existingCleanText = existingCitation && typeof existingCitation.text === 'string' ? existingCitation.text : "";
           const existingTitleMatch = existingCleanText.match(/\)\.\s([^\.]+)/);
-          const existingTitle = (existingTitleMatch && existingTitleMatch[1]) ? existingTitleMatch[1].trim().toLowerCase() : ``;
-          const existingUrl = uniqueCitations[i].url ? uniqueCitations[i].url.toLowerCase() : ``;
+          const existingTitle = (existingTitleMatch && existingTitleMatch[1]) ? existingTitleMatch[1].trim().toLowerCase() : "";
+          
+          // Handle URL with null check
+          let existingUrl = "";
+          if (uniqueCitations[i] && typeof uniqueCitations[i].url === 'string') {
+            existingUrl = uniqueCitations[i].url.toLowerCase();
+          }
           
           if (title === existingTitle || url === existingUrl) {
             citationMap.set(oldIndex + 1, i + 1); // +1 because citation numbers start at 1
