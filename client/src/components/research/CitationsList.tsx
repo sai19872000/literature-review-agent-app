@@ -75,13 +75,41 @@ export default function CitationsList({ citations }: CitationsListProps) {
     );
   };
 
+  // Filter and deduplicate citations based on title and content
+  const getUniqueReferences = (cits: Citation[]): Citation[] => {
+    // Extract titles from citation text for deduplication
+    const seenTitles = new Set<string>();
+    const seenUrls = new Set<string>();
+    
+    return cits.filter((citation: Citation, index: number) => {
+      // Clean and extract title from text
+      const cleanText = citation.text || "";
+      const titleMatch = cleanText.match(/\)\.\s([^\.]+)/);
+      const title = titleMatch ? titleMatch[1].trim().toLowerCase() : `citation-${index}`;
+      const url = citation.url ? citation.url.toLowerCase() : `url-${index}`;
+      
+      // Skip duplicates based on title or URL
+      if (seenTitles.has(title) || seenUrls.has(url)) {
+        return false;
+      }
+      
+      // Add this title and URL to seen sets
+      seenTitles.add(title);
+      seenUrls.add(url);
+      return true;
+    });
+  };
+
+  // Get unique citations
+  const uniqueCitations = getUniqueReferences(citations);
+
   return (
     <div className="space-y-4 mt-6">
-      <h3 className="text-xl font-bold mb-4">References</h3>
+      <h3 className="text-xl font-bold mb-4">References ({uniqueCitations.length})</h3>
       <div className="references-grid grid gap-4">
-        {citations.map((citation, index) => {
+        {uniqueCitations.map((citation: Citation, index: number) => {
           // Filter out any "Not fully specified" citations
-          if (citation.authors.includes("Not fully specified")) {
+          if (citation.authors && citation.authors.includes("Not fully specified")) {
             const updatedCitation = {
               ...citation,
               authors: citation.authors.replace(/Not fully specified in search results/g, "Research Team")
