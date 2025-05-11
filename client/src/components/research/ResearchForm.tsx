@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GenerateResearchRequest } from "@shared/schema";
 
 interface ResearchFormProps {
@@ -15,7 +14,8 @@ interface ResearchFormProps {
 export default function ResearchForm({ activeTab, onSubmit, isProcessing }: ResearchFormProps) {
   const [textInput, setTextInput] = useState("");
   const [keywords, setKeywords] = useState("");
-  const [sourcesLimit, setSourcesLimit] = useState("10");
+  // Always use maximum sources for deep research
+  const MAX_SOURCES = 20; 
 
   const handleSubmit = () => {
     let payload: GenerateResearchRequest;
@@ -29,7 +29,7 @@ export default function ResearchForm({ activeTab, onSubmit, isProcessing }: Rese
       payload = {
         type: "keywords",
         keywords: keywords.trim(),
-        sourcesLimit: parseInt(sourcesLimit),
+        sourcesLimit: MAX_SOURCES, // Always use maximum sources
       };
     } else {
       // Validation error
@@ -75,21 +75,9 @@ export default function ResearchForm({ activeTab, onSubmit, isProcessing }: Rese
             />
           </div>
 
-          <div className="mb-4">
-            <Label htmlFor="keywords-limit" className="block mb-2 font-medium">
-              Number of sources to search
-            </Label>
-            <Select defaultValue={sourcesLimit} onValueChange={setSourcesLimit}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select number of sources" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 sources</SelectItem>
-                <SelectItem value="10">10 sources</SelectItem>
-                <SelectItem value="15">15 sources</SelectItem>
-                <SelectItem value="20">20 sources</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Maximum sources always used for deep research - selection removed */}
+          <div className="mb-4 text-sm text-gray-600 italic">
+            <p>Deep research mode will automatically use all available sources for comprehensive results.</p>
           </div>
         </>
       )}

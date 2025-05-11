@@ -149,17 +149,17 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
             {researchSummary.modelUsed && (
               <div className="flex items-center text-xs">
                 <span className={`rounded-full px-2 py-1 mr-2 ${
-                  researchSummary.modelUsed === "sonar-deep-research" 
+                  researchSummary.modelUsed === "sonar-deep-research" || researchSummary.modelUsed === "sonar-pro"
                     ? "bg-purple-100 text-purple-700" 
                     : researchSummary.title === "Enhanced Original Text with Citations"
                       ? "bg-blue-100 text-blue-700"
-                      : "bg-blue-100 text-blue-700"
+                      : "bg-purple-100 text-purple-700"
                 }`}>
                   {researchSummary.modelUsed === "sonar-deep-research" 
                     ? "Deep Research Mode" 
                     : researchSummary.title === "Enhanced Original Text with Citations"
                       ? "Preserve Original Text Mode"
-                      : "Standard Research"}
+                      : "Deep Research Mode"}
                 </span>
                 <span className="text-gray-500">
                   Generated using {researchSummary.modelUsed}
