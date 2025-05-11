@@ -250,17 +250,23 @@ async function createStructuredOutput(
 ): Promise<{ title: string; content: string; citations: Citation[] }> {
   try {
     // Prepare citation information for Claude
+    // Include ALL available citations with proper numbers
     const citationsText = perplexityCitations
       .map((citation, index) => {
         // Format proper citations without "Not fully specified" text
         const authorText = citation.authors ? 
-          citation.authors.replace(/Not fully specified in search results/g, 'Research Team') : 
+          citation.authors.replace(/Not fully specified in search results/g, 'Research Team')
+                         .replace(/Not fully specified/g, 'Research Team')
+                         .replace(/Not specified/g, 'Research Team')
+                         .replace(/not available/i, 'Research Team') : 
           'Research Team';
           
         const url = citation.url || '';
         return `[${index + 1}] ${authorText}. ${citation.text} ${url}`;
       })
       .join("\n");
+      
+    console.log(`Providing ${perplexityCitations.length} properly numbered citations to Claude`);
 
     const response = await anthropic.messages.create({
       model: "claude-3-7-sonnet-20250219",
@@ -278,10 +284,15 @@ async function createStructuredOutput(
       Do not add any citations that are not in the provided list.
       Format the content cleanly with proper paragraphs and spacing.
       
-      CRITICALLY IMPORTANT: Before finalizing your response, verify that all citation numbers in the text match the available citations. 
-      If you reference [20] in the text, make sure citation #20 exists in the provided citation list.
-      Check every citation number in your text and ensure there is a matching reference in the list.
-      If you find any citation numbers that exceed the available citations, replace them with appropriate citation numbers from the available list.`,
+      CRITICALLY IMPORTANT: You MUST follow these citation rules:
+      1. Use ALL available citations in your content - don't leave any out
+      2. Make sure every citation number in your text has a corresponding reference in the list
+      3. Don't skip any citation numbers - if you cite [1], [2], [4], you must also cite [3]
+      4. Before finalizing, verify all citation numbers match the available references
+      5. Ensure any citation number mentioned in the text (like [20]) has a reference #20 in the list
+      6. If you find citation numbers that exceed what's available, reduce them to stay within the citation range
+      
+      The output MUST include references to all available citations to create a comprehensive paper.`,
       messages: [
         {
           role: "user",

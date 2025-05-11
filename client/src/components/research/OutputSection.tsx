@@ -50,10 +50,10 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
           const existingTitleMatch = existingCleanText.match(/\)\.\s([^\.]+)/);
           const existingTitle = (existingTitleMatch && existingTitleMatch[1]) ? existingTitleMatch[1].trim().toLowerCase() : "";
           
-          // Handle URL with null check
+          // Handle URL with null check using the already defined existingCitation
           let existingUrl = "";
-          if (uniqueCitations[i] && typeof uniqueCitations[i].url === 'string') {
-            existingUrl = uniqueCitations[i].url.toLowerCase();
+          if (existingCitation && existingCitation.url) {
+            existingUrl = String(existingCitation.url).toLowerCase();
           }
           
           if (title === existingTitle || url === existingUrl) {
