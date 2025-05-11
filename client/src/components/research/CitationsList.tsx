@@ -50,28 +50,31 @@ export default function CitationsList({ citations }: CitationsListProps) {
       .trim();
     
     return (
-      <div key={index} className="citation mb-6 pb-3 border-b border-gray-200">
-        {/* Title as main focus */}
-        <div className="font-medium text-base">
-          {citation.url ? (
-            <a 
-              href={citation.url} 
-              target="_blank"
-              rel="noopener noreferrer" 
-              className="text-blue-600 hover:underline"
-            >
-              {title}
-            </a>
-          ) : (
-            <span>{title}</span>
-          )}
+      <li key={index} className="citation pl-1 mb-6 pb-3 border-b border-gray-200">
+        {/* Include number directly in the list item */}
+        <div>
+          {/* Title as main focus */}
+          <div className="font-medium text-base">
+            {citation.url ? (
+              <a 
+                href={citation.url} 
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="text-blue-600 hover:underline"
+              >
+                {title}
+              </a>
+            ) : (
+              <span>{title}</span>
+            )}
+          </div>
+          
+          {/* Author and year in simplified format */}
+          <div className="text-sm text-gray-600 mt-1">
+            {cleanAuthors} ({year})
+          </div>
         </div>
-        
-        {/* Author and year in simplified format */}
-        <div className="text-sm text-gray-600 mt-1">
-          {cleanAuthors} ({year})
-        </div>
-      </div>
+      </li>
     );
   };
 
@@ -106,7 +109,7 @@ export default function CitationsList({ citations }: CitationsListProps) {
   return (
     <div className="space-y-4 mt-6">
       <h3 className="text-xl font-bold mb-4">References ({uniqueCitations.length})</h3>
-      <div className="references-grid grid gap-4">
+      <ol className="list-decimal pl-8 space-y-2">
         {uniqueCitations.map((citation: Citation, index: number) => {
           // Filter out any "Not fully specified" citations
           if (citation.authors && citation.authors.includes("Not fully specified")) {
@@ -118,7 +121,7 @@ export default function CitationsList({ citations }: CitationsListProps) {
           }
           return formatCitation(citation, index);
         })}
-      </div>
+      </ol>
     </div>
   );
 }

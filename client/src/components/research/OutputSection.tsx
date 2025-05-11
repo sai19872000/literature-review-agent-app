@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ResearchSummary } from "@shared/schema";
+import { ResearchSummary, Citation } from "@shared/schema";
 import CitationsList from "./CitationsList";
 import { useToast } from "@/hooks/use-toast";
 import { performAgenticDeepResearch } from "@/lib/api";
@@ -15,9 +15,135 @@ export default function OutputSection({ isProcessing, researchSummary, setResear
   const { toast } = useToast();
   const [localSummary, setLocalSummary] = useState<ResearchSummary | null>(researchSummary);
   
-  // Use useEffect to update local state when props change
+  // Filter and deduplicate citations based on title and content
+  const getUniqueReferences = (citations: Citation[]): Citation[] => {
+    // Skip if not enough citations
+    if (!citations || citations.length <= 1) {
+      return citations;
+    }
+    
+    // Extract titles from citation text for deduplication
+    const seenTitles = new Set<string>();
+    const seenUrls = new Set<string>();
+    const uniqueCitations: Citation[] = [];
+    
+    // Create map to track old index -> new index for renumbering in content
+    const citationMap = new Map<number, number>();
+    
+    citations.forEach((citation, oldIndex) => {
+      // Clean and extract title from text
+      const cleanText = citation.text || "";
+      const titleMatch = cleanText.match(/\)\.\s([^\.]+)/);
+      const title = titleMatch ? titleMatch[1].trim().toLowerCase() : `citation-${oldIndex}`;
+      const url = citation.url ? citation.url.toLowerCase() : `url-${oldIndex}`;
+      
+      // Skip duplicates based on title or URL
+      if (seenTitles.has(title) || seenUrls.has(url)) {
+        // Find which index this duplicate maps to
+        for (let i = 0; i < uniqueCitations.length; i++) {
+          const existingCleanText = uniqueCitations[i].text || "";
+          const existingTitleMatch = existingCleanText.match(/\)\.\s([^\.]+)/);
+          const existingTitle = (existingTitleMatch && existingTitleMatch[1]) ? existingTitleMatch[1].trim().toLowerCase() : ``;
+          const existingUrl = uniqueCitations[i].url ? uniqueCitations[i].url.toLowerCase() : ``;
+          
+          if (title === existingTitle || url === existingUrl) {
+            citationMap.set(oldIndex + 1, i + 1); // +1 because citation numbers start at 1
+            break;
+          }
+        }
+      } else {
+        // Add to unique list and track mapping
+        citationMap.set(oldIndex + 1, uniqueCitations.length + 1); // +1 because citation numbers start at 1
+        uniqueCitations.push(citation);
+        
+        // Add this title and URL to seen sets
+        seenTitles.add(title);
+        seenUrls.add(url);
+      }
+    });
+    
+    return uniqueCitations;
+  };
+  
+  // Function to update citation numbers in content
+  const updateContentCitationNumbers = (content: string, citationMap: Map<number, number>): string => {
+    if (!content || citationMap.size === 0) return content;
+    
+    // Replace citation numbers using regex
+    let updatedContent = content;
+    
+    // Replace citation numbers in the format [X]
+    // Use Array.from to avoid iterator issues with TypeScript
+    Array.from(citationMap.entries()).forEach(([oldNum, newNum]) => {
+      const regex = new RegExp(`\\[${oldNum}\\]`, 'g');
+      updatedContent = updatedContent.replace(regex, `[${newNum}]`);
+    });
+    
+    return updatedContent;
+  };
+  
+  // Use useEffect to update local state and process citations when props change
   useEffect(() => {
-    setLocalSummary(researchSummary);
+    if (researchSummary && researchSummary.citations && researchSummary.citations.length > 0) {
+      // Process citations to ensure uniqueness
+      const uniqueCitations = getUniqueReferences(researchSummary.citations);
+      
+      // Create a citation mapping for renumbering
+      // We need to map from original citation indices to new indices after deduplication
+      const citationMap = new Map<number, number>();
+      
+      // We need to build the full mapping from old indices to new ones
+      const originalCitations = researchSummary.citations;
+      
+      // First build a map of what's being deduplicated
+      for (let oldIdx = 0; oldIdx < originalCitations.length; oldIdx++) {
+        let foundMatch = false;
+        const citation = originalCitations[oldIdx];
+        
+        // Extract identifying information
+        const cleanText = citation.text || "";
+        const titleMatch = cleanText.match(/\)\.\s([^\.]+)/);
+        const title = titleMatch ? titleMatch[1].trim().toLowerCase() : `citation-${oldIdx}`;
+        const url = citation.url ? citation.url.toLowerCase() : `url-${oldIdx}`;
+        
+        // Find where this appears in uniqueCitations, if at all
+        for (let newIdx = 0; newIdx < uniqueCitations.length; newIdx++) {
+          const uniqueCitation = uniqueCitations[newIdx];
+          const uniqueCleanText = uniqueCitation.text || "";
+          const uniqueTitleMatch = uniqueCleanText.match(/\)\.\s([^\.]+)/);
+          const uniqueTitle = uniqueTitleMatch ? uniqueTitleMatch[1].trim().toLowerCase() : ``;
+          const uniqueUrl = uniqueCitation.url ? uniqueCitation.url.toLowerCase() : ``;
+          
+          if (title === uniqueTitle || url === uniqueUrl || 
+              (citation.authors === uniqueCitation.authors && 
+               citation.text && uniqueCitation.text && 
+               citation.text.includes(uniqueCitation.text.substring(0, Math.min(20, uniqueCitation.text.length))))) {
+            citationMap.set(oldIdx + 1, newIdx + 1);
+            foundMatch = true;
+            break;
+          }
+        }
+        
+        // If no match found, this is weird but we'll use the original number
+        if (!foundMatch) {
+          citationMap.set(oldIdx + 1, oldIdx + 1);
+        }
+      }
+      
+      // Renumber citations in the content
+      const updatedContent = updateContentCitationNumbers(researchSummary.content, citationMap);
+      
+      // Create updated summary with unique citations and renumbered content
+      const updatedSummary = {
+        ...researchSummary,
+        content: updatedContent,
+        citations: uniqueCitations
+      };
+      
+      setLocalSummary(updatedSummary);
+    } else {
+      setLocalSummary(researchSummary);
+    }
   }, [researchSummary]);
 
   const copyToClipboard = async () => {
