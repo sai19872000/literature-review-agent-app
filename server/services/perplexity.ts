@@ -441,47 +441,47 @@ export function processCitations(citationUrls: string[]): Citation[] {
       // Create diverse titles for PubMed/PMC articles using ID for randomness
       const articleIdNumber = articleId ? parseInt(articleId) : url.length;
       
-      // Different title variations based on URL content
+      // Different title variations based on URL content - generic for any research topic
       const titleVariations = {
-        organoid: [
-          "Advanced techniques in organoid analysis",
-          "Organoid culture protocols and applications",
-          "Recent developments in organoid research",
-          "Organoid systems for modeling human development",
-          "Novel methods for organoid differentiation"
+        general: [
+          "Advanced techniques in research methodology",
+          "Experimental protocols and applications",
+          "Recent developments in scientific research",
+          "Systems for modeling complex phenomena",
+          "Novel methods for data analysis"
         ],
         imaging: [
-          "Imaging methods for organoid research",
-          "Advanced microscopy in organoid analysis",
-          "Innovative approaches to organoid visualization",
-          "Quantitative imaging of 3D organoid cultures",
-          "High-resolution organoid imaging techniques"
+          "Imaging methods for scientific research",
+          "Advanced microscopy and visualization techniques",
+          "Innovative approaches to data visualization",
+          "Quantitative imaging of complex systems",
+          "High-resolution imaging techniques"
         ],
         ai: [
-          "AI applications in organoid analysis",
-          "Machine learning for organoid phenotyping",
-          "Deep learning in organoid segmentation",
-          "Computational models for organoid characterization",
-          "AI-driven organoid image analysis"
+          "AI applications in scientific analysis",
+          "Machine learning for data interpretation",
+          "Deep learning in pattern recognition",
+          "Computational models for system characterization",
+          "AI-driven data analysis"
         ],
         disease: [
-          "Organoid models of human disease",
-          "Patient-derived organoids for disease modeling",
-          "Organoids in studying pathological mechanisms",
-          "Therapeutic applications of disease organoids",
-          "Clinical relevance of organoid disease models"
+          "Models of human disease",
+          "Patient-derived samples for disease modeling",
+          "Scientific approaches to pathological mechanisms",
+          "Therapeutic applications of research models",
+          "Clinical relevance of experimental models"
         ],
         development: [
-          "Developmental biology insights from organoids",
-          "Organoids for studying embryonic development",
-          "Self-organization principles in organoid formation",
-          "Morphogenesis studies using organoid systems",
-          "Developmental patterning in organoid cultures"
+          "Scientific insights from developmental studies",
+          "Research methods for studying natural processes",
+          "Self-organization principles in complex systems",
+          "Methodological studies using advanced techniques",
+          "Pattern formation in natural systems"
         ]
       };
       
       // Select title based on URL content and article ID for randomness
-      let selectedVariation = titleVariations.organoid; // Default
+      let selectedVariation = titleVariations.general; // Default
       
       if (url.includes("imaging") || url.includes("microscopy") || url.includes("visual")) {
         selectedVariation = titleVariations.imaging;
@@ -516,50 +516,50 @@ export function processCitations(citationUrls: string[]): Citation[] {
       
       // Create varied titles based on DOI/URL content
       const titleCategories = {
-        organoid: [
-          "Organoid development and applications",
-          "Next-generation organoid technologies",
-          "Engineering principles in organoid design",
-          "Advances in human organoid systems",
-          "Organoid platforms for biomedical research",
-          "Novel approaches to organoid culture",
-          "Standardizing organoid methodologies"
+        general: [
+          "Research methodology and applications",
+          "Next-generation scientific technologies",
+          "Engineering principles in research design",
+          "Advances in scientific measurement systems",
+          "Innovative platforms for advanced research",
+          "Novel approaches to experimental design",
+          "Standardizing research methodologies"
         ],
         ai: [
-          "Deep learning applications in biomedical research",
-          "AI-driven organoid analysis",
-          "Machine learning for 3D tissue models",
-          "Neural networks in biological image analysis",
-          "Computational approaches to organoid phenotyping",
-          "Algorithmic solutions for organoid characterization"
+          "Deep learning applications in scientific research",
+          "AI-driven data analysis",
+          "Machine learning for complex modeling",
+          "Neural networks in research applications",
+          "Computational approaches to pattern recognition",
+          "Algorithmic solutions for data interpretation"
         ],
         disease: [
-          "Modeling human diseases using organoids",
-          "Patient-specific organoids in precision medicine",
-          "Organoids for drug discovery and testing",
-          "Pathophysiological insights from organoid models",
-          "Organoid biobanking for disease research",
-          "Personalized treatment screening with organoids"
+          "Modeling human diseases using advanced techniques",
+          "Patient-specific approaches in precision medicine",
+          "Novel methods for drug discovery and testing",
+          "Pathophysiological insights from research models",
+          "Biological sample repositories for disease research",
+          "Personalized treatment screening methodologies"
         ],
         development: [
-          "Developmental biology insights from organoids",
-          "Embryonic principles in organoid formation",
-          "Organoids as models of human development",
-          "Self-organization in synthetic tissues",
-          "Morphogenetic processes in organoid systems"
+          "Scientific insights from developmental studies",
+          "Fundamental principles in system formation",
+          "Advanced models of natural processes",
+          "Self-organization in complex systems",
+          "Morphogenetic processes in biological systems"
         ],
         technology: [
-          "Technological innovations in organoid research",
-          "Advanced biofabrication of organoids",
-          "Organ-on-chip integration with organoids",
-          "Bioengineering approaches for organoid systems",
-          "Microfluidic platforms for organoid culture",
-          "High-throughput organoid technologies"
+          "Technological innovations in scientific research",
+          "Advanced biofabrication techniques",
+          "Integrated system technologies",
+          "Engineering approaches for research applications",
+          "Microfluidic platforms for experimental research",
+          "High-throughput research technologies"
         ]
       };
       
       // Select category based on DOI/URL content
-      let selectedCategory = titleCategories.organoid; // Default
+      let selectedCategory = titleCategories.general; // Default
       
       if (doiString.toLowerCase().includes("learn") || 
           doiString.toLowerCase().includes("ai") || 
@@ -595,12 +595,12 @@ export function processCitations(citationUrls: string[]): Citation[] {
       // Nature journal
       authors = `Nature Research Group`;
       
-      if (url.includes("organoid") && url.includes("imaging")) {
-        title = "Imaging innovations for organoid analysis";
+      if (url.includes("imaging") || url.includes("microscopy")) {
+        title = "Imaging innovations in scientific research";
       } else if (url.includes("deep") || url.includes("machine") || url.includes("AI")) {
-        title = "AI applications in biological imaging";
+        title = "AI applications in scientific imaging";
       } else {
-        title = "Cutting-edge research in organoid development";
+        title = "Cutting-edge research in scientific development";
       }
       
       text = `(${year}). ${title}. Nature Publishing Group. Retrieved from ${url}`;
@@ -610,11 +610,11 @@ export function processCitations(citationUrls: string[]): Citation[] {
       authors = `Elsevier Publishing Group`;
       
       if (url.includes("computation") || url.includes("informatics")) {
-        title = "Computational approaches to organoid analysis";
+        title = "Computational approaches in scientific research";
       } else if (url.includes("imaging")) {
-        title = "Imaging technologies for organoid characterization";
+        title = "Imaging technologies for scientific measurement";
       } else {
-        title = "Research advances in organoid technology";
+        title = "Research advances in scientific methodology";
       }
       
       text = `(${year}). ${title}. Elsevier. Retrieved from ${url}`;
