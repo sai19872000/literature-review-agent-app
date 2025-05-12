@@ -25,12 +25,20 @@ export default function CitationsList({ citations }: CitationsListProps) {
     if (titleMatch && titleMatch[1]) {
       title = titleMatch[1].trim();
     } else {
-      // Default title based on domain
+      // Default title based on domain - keeping it generic for any topic
       if (citation.url) {
         if (citation.url.includes("pubmed") || citation.url.includes("nih")) {
-          title = "Research article on organoid analysis";
+          title = "Academic research article";
         } else if (citation.url.includes("nature")) {
-          title = "Nature publication on organoids";
+          title = "Nature journal publication";
+        } else if (citation.url.includes("science")) {
+          title = "Science journal publication";
+        } else if (citation.url.includes("gov")) {
+          title = "Government publication";
+        } else if (citation.url.includes("edu")) {
+          title = "Academic institution publication";
+        } else if (citation.url.includes("org")) {
+          title = "Organization research report";
         } else {
           title = "Research publication";
         }
