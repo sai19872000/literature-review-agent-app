@@ -12,7 +12,6 @@ import {
   generateResearchSummary,
   makePerplexitySonarQuery,
   processCitations,
-  maximizeDiverseReferences,
 } from "./perplexity";
 import { ResearchSummary, Citation } from "@shared/schema";
 
@@ -76,9 +75,8 @@ export async function processDeepResearch(
     let perplexityCitations: Citation[] = [];
     
     if (perplexityResults.citations && perplexityResults.citations.length > 0) {
-      // Process and then maximize citation diversity
+      // Process the citations without modifications
       perplexityCitations = processCitations(perplexityResults.citations);
-      perplexityCitations = maximizeDiverseReferences(perplexityCitations);
       
       console.log(`Using ${perplexityCitations.length} authentic citations from Perplexity - no fallbacks`);
     } else {
