@@ -310,7 +310,7 @@ export async function makePerplexitySonarQuery(
 
 /**
  * Process citation URLs from Perplexity API into structured Citation objects
- * Exported so it can be used by other services
+ * Creates simplified citation structure for Claude to enhance
  */
 export function processCitations(citationUrls: string[]): Citation[] {
   // Handle empty citations array
@@ -325,316 +325,26 @@ export function processCitations(citationUrls: string[]): Citation[] {
   }
   
   return citationUrls.map((url, index) => {
-    // Extract domain name for a basic author reference
+    // Extract domain name for a basic reference
     const domainMatch = url.match(/https?:\/\/(?:www\.)?([^\/]+)/i);
     const domain = domainMatch
       ? domainMatch[1].replace(/\.(com|org|edu|gov|net)$/i, "")
       : "Unknown Source";
 
-    // Format domain for better readability as author
+    // Format domain for better readability
     const formattedDomain = domain
       .split(".")
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
     
-    let authors = "";
-    let text = "";
-    let year = new Date().getFullYear().toString();
-    let title = ""; // Will be populated based on source
-    
-    // Parse URLs from different sources to extract more information
-    if (
-      url.includes("pubmed.ncbi.nlm.nih.gov") ||
-      url.includes("pmc.ncbi.nlm.nih.gov")
-    ) {
-      // PubMed/PMC citations
-      const articleMatch = url.match(/PMC(\d+)/i);
-      const pubmedMatch = url.match(/pubmed\/(\d+)/i);
-      const articleId = articleMatch
-        ? articleMatch[1]
-        : pubmedMatch
-          ? pubmedMatch[1]
-          : null;
-
-      authors = `PubMed Research Group`;
-      
-      // Create diverse titles for PubMed/PMC articles using ID for randomness
-      const articleIdNumber = articleId ? parseInt(articleId) : url.length;
-      
-      // Different title variations based on URL content - generic for any research topic
-      const titleVariations = {
-        general: [
-          "Advanced techniques in research methodology",
-          "Experimental protocols and applications",
-          "Recent developments in scientific research",
-          "Systems for modeling complex phenomena",
-          "Novel methods for data analysis"
-        ],
-        imaging: [
-          "Imaging methods for scientific research",
-          "Advanced microscopy and visualization techniques",
-          "Innovative approaches to data visualization",
-          "Quantitative imaging of complex systems",
-          "High-resolution imaging techniques"
-        ],
-        ai: [
-          "AI applications in scientific analysis",
-          "Machine learning for data interpretation",
-          "Deep learning in pattern recognition",
-          "Computational models for system characterization",
-          "AI-driven data analysis"
-        ],
-        disease: [
-          "Models of human disease",
-          "Patient-derived samples for disease modeling",
-          "Scientific approaches to pathological mechanisms",
-          "Therapeutic applications of research models",
-          "Clinical relevance of experimental models"
-        ],
-        development: [
-          "Scientific insights from developmental studies",
-          "Research methods for studying natural processes",
-          "Self-organization principles in complex systems",
-          "Methodological studies using advanced techniques",
-          "Pattern formation in natural systems"
-        ]
-      };
-      
-      // Select title based on URL content and article ID for randomness
-      let selectedVariation = titleVariations.general; // Default
-      
-      if (url.includes("imaging") || url.includes("microscopy") || url.includes("visual")) {
-        selectedVariation = titleVariations.imaging;
-      } else if (url.includes("deep") || url.includes("machine") || url.includes("neural") || url.includes("ai") || url.includes("algorithm")) {
-        selectedVariation = titleVariations.ai;
-      } else if (url.includes("disease") || url.includes("cancer") || url.includes("patient") || url.includes("tumor") || url.includes("patholog")) {
-        selectedVariation = titleVariations.disease;
-      } else if (url.includes("develop") || url.includes("embryo") || url.includes("morpho") || url.includes("pattern")) {
-        selectedVariation = titleVariations.development;
-      }
-      
-      // Use article ID or URL length to pick a title variation for randomness
-      const variationIndex = articleIdNumber % selectedVariation.length;
-      title = selectedVariation[variationIndex];
-      
-      text = `(${year}). ${title}. ${articleId ? `PubMed/PMC Article ID: ${articleId}. ` : ""}National Library of Medicine. Retrieved from ${url}`;
-      
-    } else if (url.includes("doi.org")) {
-      // DOI citations
-      const doiMatch = url.match(/doi\.org\/(.+)$/i);
-      authors = `Scientific Research Group`;
-      
-      // Use DOI string to create varied titles (if available)
-      let doiString = doiMatch ? doiMatch[1] : url;
-      
-      // Generate a hash-like number from the DOI string for randomness
-      let doiHash = 0;
-      for (let i = 0; i < doiString.length; i++) {
-        doiHash = ((doiHash << 5) - doiHash) + doiString.charCodeAt(i);
-      }
-      doiHash = Math.abs(doiHash);
-      
-      // Create varied titles based on DOI/URL content
-      const titleCategories = {
-        general: [
-          "Research methodology and applications",
-          "Next-generation scientific technologies",
-          "Engineering principles in research design",
-          "Advances in scientific measurement systems",
-          "Innovative platforms for advanced research",
-          "Novel approaches to experimental design",
-          "Standardizing research methodologies"
-        ],
-        ai: [
-          "Deep learning applications in scientific research",
-          "AI-driven data analysis",
-          "Machine learning for complex modeling",
-          "Neural networks in research applications",
-          "Computational approaches to pattern recognition",
-          "Algorithmic solutions for data interpretation"
-        ],
-        disease: [
-          "Modeling human diseases using advanced techniques",
-          "Patient-specific approaches in precision medicine",
-          "Novel methods for drug discovery and testing",
-          "Pathophysiological insights from research models",
-          "Biological sample repositories for disease research",
-          "Personalized treatment screening methodologies"
-        ],
-        development: [
-          "Scientific insights from developmental studies",
-          "Fundamental principles in system formation",
-          "Advanced models of natural processes",
-          "Self-organization in complex systems",
-          "Morphogenetic processes in biological systems"
-        ],
-        technology: [
-          "Technological innovations in scientific research",
-          "Advanced biofabrication techniques",
-          "Integrated system technologies",
-          "Engineering approaches for research applications",
-          "Microfluidic platforms for experimental research",
-          "High-throughput research technologies"
-        ]
-      };
-      
-      // Select category based on DOI/URL content
-      let selectedCategory = titleCategories.general; // Default
-      
-      if (doiString.toLowerCase().includes("learn") || 
-          doiString.toLowerCase().includes("ai") || 
-          doiString.toLowerCase().includes("comput") || 
-          doiString.toLowerCase().includes("neural") ||
-          doiString.toLowerCase().includes("algorithm")) {
-        selectedCategory = titleCategories.ai;
-      } else if (doiString.toLowerCase().includes("disease") || 
-                doiString.toLowerCase().includes("cancer") || 
-                doiString.toLowerCase().includes("patient") ||
-                doiString.toLowerCase().includes("drug") ||
-                doiString.toLowerCase().includes("therapy")) {
-        selectedCategory = titleCategories.disease;
-      } else if (doiString.toLowerCase().includes("develop") || 
-                doiString.toLowerCase().includes("embryo") || 
-                doiString.toLowerCase().includes("morpho")) {
-        selectedCategory = titleCategories.development;
-      } else if (doiString.toLowerCase().includes("tech") || 
-                doiString.toLowerCase().includes("fabric") || 
-                doiString.toLowerCase().includes("chip") ||
-                doiString.toLowerCase().includes("engineer") ||
-                doiString.toLowerCase().includes("fluid")) {
-        selectedCategory = titleCategories.technology;
-      }
-      
-      // Select a title based on DOI hash
-      const titleIndex = doiHash % selectedCategory.length;
-      title = selectedCategory[titleIndex];
-      
-      text = `(${year}). ${title}. ${doiMatch ? `DOI: ${doiMatch[1]}. ` : ""}Digital Object Identifier Foundation. Retrieved from ${url}`;
-      
-    } else if (url.includes("nature.com")) {
-      // Nature journal
-      authors = `Nature Research Group`;
-      
-      if (url.includes("imaging") || url.includes("microscopy")) {
-        title = "Imaging innovations in scientific research";
-      } else if (url.includes("deep") || url.includes("machine") || url.includes("AI")) {
-        title = "AI applications in scientific imaging";
-      } else {
-        title = "Cutting-edge research in scientific development";
-      }
-      
-      text = `(${year}). ${title}. Nature Publishing Group. Retrieved from ${url}`;
-      
-    } else if (url.includes("sciencedirect.com") || url.includes("elsevier.com")) {
-      // Science Direct/Elsevier
-      authors = `Elsevier Publishing Group`;
-      
-      if (url.includes("computation") || url.includes("informatics")) {
-        title = "Computational approaches in scientific research";
-      } else if (url.includes("imaging")) {
-        title = "Imaging technologies for scientific measurement";
-      } else {
-        title = "Research advances in scientific methodology";
-      }
-      
-      text = `(${year}). ${title}. Elsevier. Retrieved from ${url}`;
-      
-    } else {
-      // Generate titles for other sources based on domain and url path components
-      authors = `${formattedDomain} Research Team`;
-      
-      // Extract words from URL path to generate more varied titles
-      const pathWords = url.split('/').filter(segment => 
-        segment.length > 3 && 
-        !segment.includes('www.') && 
-        !segment.includes('http') && 
-        !segment.includes('.com') && 
-        !segment.includes('.org')
-      );
-      
-      // Pick a more specific topic based on URL content
-      const specificTopics = [
-        "scientific research", "research methodology", "literature review", 
-        "data analysis", "empirical studies", "experimental design",
-        "scientific literature", "research techniques", "data collection",
-        "research findings", "evidence-based research", "peer-reviewed research",
-        "quantitative analysis", "qualitative research", "scientific consensus"
-      ];
-      
-      // Look for relevant keywords in URL to choose specific topic
-      let specificTopic = "scientific research";
-      for (const topic of specificTopics) {
-        const keywords = topic.split(' ');
-        if (keywords.some(kw => url.toLowerCase().includes(kw.toLowerCase()))) {
-          specificTopic = topic;
-          break;
-        }
-      }
-      
-      // Create varied titles based on domain and URL content
-      // Use index and specific path words to ensure diversity
-      if (domain.includes("cell") || domain.includes("bio")) {
-        const variations = [
-          `Advances in ${specificTopic} research`,
-          `New frontiers in ${specificTopic} development`,
-          `Cellular biology insights for ${specificTopic}`,
-          `Breakthrough methods for ${specificTopic} culture`,
-        ];
-        title = variations[Math.floor(url.length % variations.length)];
-      } else if (domain.includes("tech") || domain.includes("ai") || domain.includes("compute")) {
-        const variations = [
-          `Computational analysis of ${specificTopic}`,
-          `AI-driven approaches for ${specificTopic} characterization`,
-          `Machine learning methods for ${specificTopic}`,
-          `Technological innovations in ${specificTopic} research`,
-        ];
-        title = variations[Math.floor(url.length % variations.length)];
-      } else if (domain.includes("med") || domain.includes("health")) {
-        const variations = [
-          `Clinical applications of ${specificTopic}`,
-          `${specificTopic} in translational medicine`,
-          `Therapeutic potential of ${specificTopic}`,
-          `${specificTopic} for personalized healthcare`,
-        ];
-        title = variations[Math.floor(url.length % variations.length)];
-      } else {
-        // Use path components to create more specific titles
-        if (pathWords.length > 0) {
-          const relevantWord = pathWords[pathWords.length - 1]
-            .replace(/[-_]/g, ' ')
-            .replace(/\d+/g, '')
-            .trim();
-            
-          if (relevantWord.length > 3) {
-            title = `${relevantWord.charAt(0).toUpperCase() + relevantWord.slice(1)} studies with ${specificTopic}`;
-          } else {
-            const variations = [
-              `Research developments in ${specificTopic}`,
-              `Current advances in ${specificTopic} technology`,
-              `Scientific perspectives on ${specificTopic}`,
-              `Innovative applications of ${specificTopic}`,
-            ];
-            title = variations[Math.floor(url.length % variations.length)];
-          }
-        } else {
-          const variations = [
-            `Research developments in ${specificTopic}`,
-            `Current advances in ${specificTopic} technology`,
-            `Scientific perspectives on ${specificTopic}`,
-            `Innovative applications of ${specificTopic}`,
-          ];
-          title = variations[Math.floor(url.length % variations.length)];
-        }
-      }
-      
-      text = `(${year}). ${title}. Retrieved from ${url}`;
-    }
-
-    // Create a citation with domain as author
-    return {
-      authors: authors,
-      text: text,
-      url,
+    // Create a simple citation with just the URL and domain
+    // The actual content formatting will be handled by Claude
+    const citation: Citation = {
+      authors: formattedDomain,
+      text: `Source from ${formattedDomain}. Retrieved from ${url}`,
+      url
     };
+    
+    return citation;
   });
 }
