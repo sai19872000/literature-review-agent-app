@@ -634,15 +634,15 @@ export function processCitations(citationUrls: string[]): Citation[] {
       
       // Pick a more specific topic based on URL content
       const specificTopics = [
-        "brain organoids", "intestinal organoids", "liver organoids", 
-        "kidney organoids", "retinal organoids", "tumor organoids",
-        "organoid biobanking", "organoid imaging", "organoid segmentation",
-        "disease modeling with organoids", "drug screening in organoids",
-        "vascularized organoids", "personalized medicine", "precision oncology"
+        "scientific research", "research methodology", "literature review", 
+        "data analysis", "empirical studies", "experimental design",
+        "scientific literature", "research techniques", "data collection",
+        "research findings", "evidence-based research", "peer-reviewed research",
+        "quantitative analysis", "qualitative research", "scientific consensus"
       ];
       
       // Look for relevant keywords in URL to choose specific topic
-      let specificTopic = "organoids";
+      let specificTopic = "scientific research";
       for (const topic of specificTopics) {
         const keywords = topic.split(' ');
         if (keywords.some(kw => url.toLowerCase().includes(kw.toLowerCase()))) {
