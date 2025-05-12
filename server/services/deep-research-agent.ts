@@ -205,19 +205,12 @@ async function createStructuredOutput(
 ): Promise<{ title: string; content: string; citations: Citation[] }> {
   try {
     // Prepare citation information for Claude
-    // Include ALL available citations with proper numbers
+    // Include ALL available citations with proper numbers - simplified to just URLs
     const citationsText = perplexityCitations
       .map((citation, index) => {
-        // Format proper citations without "Not fully specified" text
-        const authorText = citation.authors ? 
-          citation.authors.replace(/Not fully specified in search results/g, 'Research Team')
-                         .replace(/Not fully specified/g, 'Research Team')
-                         .replace(/Not specified/g, 'Research Team')
-                         .replace(/not available/i, 'Research Team') : 
-          'Research Team';
-          
-        const url = citation.url || '';
-        return `[${index + 1}] ${authorText}. ${citation.text} ${url}`;
+        // Just use URL as the citation text
+        const url = citation.url || 'No URL available';
+        return `[${index + 1}] ${url}`;
       })
       .join("\n");
       

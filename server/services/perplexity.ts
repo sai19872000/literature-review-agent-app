@@ -310,41 +310,26 @@ export async function makePerplexitySonarQuery(
 
 /**
  * Process citation URLs from Perplexity API into structured Citation objects
- * Creates simplified citation structure for Claude to enhance
+ * Creates minimal citation structure with just the URL
  */
 export function processCitations(citationUrls: string[]): Citation[] {
   // Handle empty citations array
   if (!citationUrls || citationUrls.length === 0) {
     return [
       {
-        authors: "No citations available",
-        text: "The source information for this research could not be retrieved.",
+        authors: "",
+        text: "No citations available",
         url: "",
       },
     ];
   }
   
-  return citationUrls.map((url, index) => {
-    // Extract domain name for a basic reference
-    const domainMatch = url.match(/https?:\/\/(?:www\.)?([^\/]+)/i);
-    const domain = domainMatch
-      ? domainMatch[1].replace(/\.(com|org|edu|gov|net)$/i, "")
-      : "Unknown Source";
-
-    // Format domain for better readability
-    const formattedDomain = domain
-      .split(".")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-    
-    // Create a simple citation with just the URL and domain
-    // The actual content formatting will be handled by Claude
-    const citation: Citation = {
-      authors: formattedDomain,
-      text: `Source from ${formattedDomain}. Retrieved from ${url}`,
+  // Just return the URLs as citations without any processing
+  return citationUrls.map((url) => {
+    return {
+      authors: "",
+      text: url,
       url
     };
-    
-    return citation;
   });
 }
