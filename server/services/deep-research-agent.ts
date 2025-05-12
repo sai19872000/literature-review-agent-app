@@ -72,61 +72,18 @@ export async function processDeepResearch(
     });
 
     // Process citations using the enhanced citation processor
-    // Check if we have citations from Perplexity, if not, create fallback citations from common sources
-    let perplexityCitations = [];
+    // ONLY use the citations that Perplexity actually returns
+    let perplexityCitations: Citation[] = [];
     
     if (perplexityResults.citations && perplexityResults.citations.length > 0) {
       // Process and then maximize citation diversity
       perplexityCitations = processCitations(perplexityResults.citations);
       perplexityCitations = maximizeDiverseReferences(perplexityCitations);
       
-      // Ensure we have enough citations (min 15 for deep research)
-      if (perplexityCitations.length < 15) {
-        console.log(`Only ${perplexityCitations.length} citations retrieved, adding supplementary sources`);
-        
-        // Add supplementary sources to ensure we have a comprehensive set
-        const supplementaryCitations = [
-          "https://pubmed.ncbi.nlm.nih.gov/31621631/", // Nature Reviews
-          "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5152930/", // Organoid technology
-          "https://pubmed.ncbi.nlm.nih.gov/28246271/", // Organoids in disease modeling
-          "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7482033/", // Recent advances
-          "https://doi.org/10.1016/j.cell.2022.12.037", // Cell research
-          "https://pubmed.ncbi.nlm.nih.gov/33472045/", // Brain organoids
-          "https://pubmed.ncbi.nlm.nih.gov/34986859/", // Organoids in drug discovery
-          "https://doi.org/10.1038/s41573-023-00850-y", // Organoids in personalized medicine
-          "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9737006/" // Latest advances
-        ];
-        
-        // Add only as many as needed to reach 15 citations
-        const neededCount = Math.min(15 - perplexityCitations.length, supplementaryCitations.length);
-        const additionalCitations = processCitations(supplementaryCitations.slice(0, neededCount));
-        
-        // Combine and maximize diversity again
-        perplexityCitations = [...perplexityCitations, ...additionalCitations];
-        perplexityCitations = maximizeDiverseReferences(perplexityCitations);
-      }
+      console.log(`Using ${perplexityCitations.length} authentic citations from Perplexity - no fallbacks`);
     } else {
-      // Create fallback citations based on common academic sources for organoids
-      const fallbackCitations = [
-        "https://pubmed.ncbi.nlm.nih.gov/31621631/", // Nature Reviews
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5152930/", // Organoid technology
-        "https://pubmed.ncbi.nlm.nih.gov/28246271/", // Organoids in disease modeling
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7482033/", // Recent advances
-        "https://doi.org/10.1016/j.cell.2022.12.037", // Cell research
-        "https://pubmed.ncbi.nlm.nih.gov/33472045/", // Brain organoids
-        "https://pubmed.ncbi.nlm.nih.gov/34986859/", // Organoids in drug discovery
-        "https://doi.org/10.1038/s41573-023-00850-y", // Organoids in personalized medicine
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9737006/", // Latest advances
-        "https://doi.org/10.1038/s41586-019-1535-2", // Vascularized organoids
-        "https://doi.org/10.1126/science.aaz1853", // Organ-on-chip technology
-        "https://pubmed.ncbi.nlm.nih.gov/32105635/", // Organoid biobanking
-        "https://doi.org/10.1016/j.cell.2021.10.005", // Developmental biology insights
-        "https://doi.org/10.1038/s41467-022-29960-8", // AI in organoid analysis
-        "https://pubmed.ncbi.nlm.nih.gov/31835037/" // Organoid ethics
-      ];
-      
-      perplexityCitations = processCitations(fallbackCitations);
-      perplexityCitations = maximizeDiverseReferences(perplexityCitations);
+      console.log(`Warning: No citations retrieved from Perplexity`);
+      // Leave the citations array empty rather than using fallbacks
     }
 
     broadcastProgress({
@@ -281,18 +238,17 @@ async function createStructuredOutput(
       
       Structure the output as a cohesive paper introduction that explains the topic thoroughly.
       Use the citations provided by properly referencing them as [1], [2], etc. at appropriate places.
-      Do not add any citations that are not in the provided list.
+      IMPORTANT: Do not add any citations that are not in the provided list.
       Format the content cleanly with proper paragraphs and spacing.
       
-      CRITICALLY IMPORTANT: You MUST follow these citation rules:
-      1. Use ALL available citations in your content - don't leave any out
-      2. Make sure every citation number in your text has a corresponding reference in the list
-      3. Don't skip any citation numbers - if you cite [1], [2], [4], you must also cite [3]
-      4. Before finalizing, verify all citation numbers match the available references
-      5. Ensure any citation number mentioned in the text (like [20]) has a reference #20 in the list
-      6. If you find citation numbers that exceed what's available, reduce them to stay within the citation range
+      CITATION RULES:
+      1. ONLY use the citations provided in the AVAILABLE CITATIONS section - these are authentic sources
+      2. Verify every citation number in your text has a corresponding reference in the provided list
+      3. Number citations sequentially ([1], [2], [3], etc.) and use them in appropriate places in the text
+      4. Before finalizing, double-check that all citation numbers match available references
+      5. DO NOT cite numbers beyond what's available (e.g., if only 8 citations exist, don't reference [9])
       
-      The output MUST include references to all available citations to create a comprehensive paper.`,
+      The goal is to create a high-quality academic introduction using ONLY the authentic citations provided.`,
       messages: [
         {
           role: "user",
