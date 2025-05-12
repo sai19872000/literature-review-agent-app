@@ -33,21 +33,23 @@ export default function CitationsList({ citations }: CitationsListProps) {
   return (
     <div className="space-y-4 mt-6">
       <h3 className="text-xl font-bold mb-4">References ({uniqueCitations.length})</h3>
-      <ol className="list-decimal pl-6 space-y-2 mt-4 ml-6">
+      <ol className="list-decimal pl-12 space-y-2 mt-4">
         {uniqueCitations.map((citation, index) => (
-          <li key={index} className="citation mb-4 pb-2 border-b border-gray-200">
-            {citation.url ? (
-              <a 
-                href={citation.url} 
-                target="_blank"
-                rel="noopener noreferrer" 
-                className="text-blue-600 hover:underline break-all"
-              >
-                {citation.url}
-              </a>
-            ) : (
-              <span className="text-gray-600">No URL available</span>
-            )}
+          <li key={index} className="citation mb-4 pb-2 border-b border-gray-200 relative">
+            <div className="pl-4"> {/* Add padding to the left to prevent overlap with numbers */}
+              {citation.url ? (
+                <a 
+                  href={citation.url} 
+                  target="_blank"
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  {citation.url}
+                </a>
+              ) : (
+                <span className="text-gray-600">No URL available</span>
+              )}
+            </div>
           </li>
         ))}
       </ol>
