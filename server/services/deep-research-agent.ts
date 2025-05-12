@@ -292,9 +292,7 @@ async function createStructuredOutput(
       5. Ensure any citation number mentioned in the text (like [20]) has a reference #20 in the list
       6. If you find citation numbers that exceed what's available, reduce them to stay within the citation range
       
-      IMPORTANT: Do NOT include a "References" section in your output. The system will automatically display the references separately. Your output should only contain the paper introduction with proper citation numbers in [X] format. Do not attempt to list or format the references at the end of your content.
-      
-      The content MUST include references to all available citations to create a comprehensive paper.`,
+      The output MUST include references to all available citations to create a comprehensive paper.`,
       messages: [
         {
           role: "user",
@@ -331,13 +329,6 @@ Please format this as a professional academic paper introduction with proper cit
     let content = titleMatch
       ? fullText.replace(titleMatch[0], "").trim()
       : fullText;
-      
-    // Remove any "References" section that might have been included in the content
-    const referencesMatch = content.match(/(?:^|\n)(?:##\s*References|\*\*References\*\*|References:?)(?:\n|$)/i);
-    if (referencesMatch) {
-      // Get everything before the References section
-      content = content.substring(0, referencesMatch.index).trim();
-    }
 
     return {
       title,
