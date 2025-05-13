@@ -235,9 +235,10 @@ async function createStructuredOutput(
       CITATION RULES:
       1. ONLY use the citations provided in the AVAILABLE CITATIONS section - these are authentic sources
       2. Verify every citation number in your text has a corresponding reference in the provided list
-      3. Number citations sequentially ([1], [2], [3], etc.) and use them in appropriate places in the text
-      4. Before finalizing, double-check that all citation numbers match available references
-      5. DO NOT cite numbers beyond what's available (e.g., if only 8 citations exist, don't reference [9])
+      3. Number citations sequentially ([1], [2], [3], etc.) and ensure they EXACTLY match the order in the provided list
+      4. CRITICALLY IMPORTANT: Use citation numbers that precisely correspond to the index in the list. Citation [1] must refer to the first item in the list, [2] to the second, etc.
+      5. Before finalizing, verify every citation number matches the exact position in the provided reference list
+      6. DO NOT cite numbers beyond what's available (e.g., if only 8 citations exist, don't reference [9])
       
       The goal is to create a high-quality academic introduction using ONLY the authentic citations provided.`,
       messages: [

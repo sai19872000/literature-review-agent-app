@@ -13,30 +13,17 @@ export default function CitationsList({ citations }: CitationsListProps) {
     );
   }
 
-  // Just get unique URLs
-  const getUniqueUrls = (cits: Citation[]): Citation[] => {
-    const seenUrls = new Set<string>();
-
-    return cits.filter((citation: Citation) => {
-      if (!citation.url || seenUrls.has(citation.url)) {
-        return false;
-      }
-
-      seenUrls.add(citation.url);
-      return true;
-    });
-  };
-
-  // Get unique citations by URL
-  const uniqueCitations = getUniqueUrls(citations);
+  // We're no longer deduplicating citations to ensure citation numbers match between text and references
+  // This ensures that each [n] in the text has a corresponding entry in the references list
+  const citationsToDisplay = citations;
 
   return (
     <div className="space-y-4 mt-6">
       <h3 className="text-xl font-bold mb-4">
-        References ({uniqueCitations.length})
+        References ({citationsToDisplay.length})
       </h3>
       <ol className="list-decimal pl-16 space-y-4 mt-6">
-        {uniqueCitations.map((citation, index) => (
+        {citationsToDisplay.map((citation, index) => (
           <li
             key={index}
             className="citation mb-6 pb-3 border-b border-gray-200 relative"
