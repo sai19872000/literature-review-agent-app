@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import ResearchForm from "./ResearchForm";
 import ResearchProgress from "./ResearchProgress";
 import { ResearchSummary, GenerateResearchRequest } from "@shared/schema";
-import { generateResearch, enhanceTextWithCitations, performAgenticDeepResearch } from "@/lib/api";
+import { enhanceTextWithCitations, performAgenticDeepResearch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface InputSectionProps {

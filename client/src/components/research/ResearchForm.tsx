@@ -46,13 +46,16 @@ export default function ResearchForm({ activeTab, onSubmit, isProcessing }: Rese
       {activeTab === "text" && (
         <div className="mb-4">
           <Label htmlFor="text-input" className="block mb-2 font-medium">
-            Enter text from your research
+            Enter text to enhance with citations
           </Label>
+          <div className="text-sm text-gray-600 mb-2">
+            Your text will be preserved exactly as written, and citations will be added where appropriate.
+          </div>
           <Textarea
             id="text-input"
             rows={10}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-            placeholder="Paste a paragraph or abstract from your research paper..."
+            placeholder="Paste your text here to enhance with academic citations..."
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
           />
@@ -64,20 +67,25 @@ export default function ResearchForm({ activeTab, onSubmit, isProcessing }: Rese
         <>
           <div className="mb-4">
             <Label htmlFor="keywords-input" className="block mb-2 font-medium">
-              Enter research keywords
+              Enter research topic or keywords
             </Label>
-            <Input
+            <div className="text-sm text-gray-600 mb-2">
+              We'll create a comprehensive research summary with deep academic insights on your topic.
+            </div>
+            <Textarea
               id="keywords-input"
+              rows={4}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="e.g., climate change, neural networks, renewable energy"
+              placeholder="Enter a research topic, question, or keywords (e.g., 'The impact of climate change on biodiversity')..."
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
             />
           </div>
 
           {/* Maximum sources always used for deep research - selection removed */}
-          <div className="mb-4 text-sm text-gray-600 italic">
-            <p>Deep research mode will automatically use all available sources for comprehensive results.</p>
+          <div className="mb-4 p-2 bg-purple-50 rounded-md text-sm text-gray-600">
+            <p className="font-medium text-purple-700">Deep Research Mode</p>
+            <p className="mt-1">This will generate a complete research summary with the maximum number of academic sources. The process may take 3-10 minutes.</p>
           </div>
         </>
       )}
