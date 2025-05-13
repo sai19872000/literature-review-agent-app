@@ -21,20 +21,14 @@ export default function InputSection({
 }: InputSectionProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"text" | "keywords">("text");
-  // Research mode: "standard" (regular), "preserve" (preserve original text), or "deep" (deep research)
-  const [researchMode, setResearchMode] = useState<"standard" | "preserve" | "deep">("standard");
+  // Text mode is always "preserve" and keywords mode is always "deep"
   // Tracking if we're using deep research for the loading state
   const [isUsingDeepResearch, setIsUsingDeepResearch] = useState<boolean>(false);
   // Research progress tracking
   const [progressEvents, setProgressEvents] = useState<any[]>([]);
   const [showProgress, setShowProgress] = useState<boolean>(false);
 
-  // Auto-select deep research mode for keywords
-  useEffect(() => {
-    if (activeTab === "keywords") {
-      setResearchMode("deep");
-    }
-  }, [activeTab]);
+  // No longer need to auto-select modes as they're fixed per tab
 
   // Handle WebSocket progress updates
   const handleProgressUpdate = (event: any) => {
@@ -58,23 +52,22 @@ export default function InputSection({
   
   const handleSubmit = async (formData: GenerateResearchRequest) => {
     try {
-      // Update deep research mode state
-      const isDeepResearch = researchMode === "deep";
+      // Determine mode based on tab - text=preserve, keywords=deep
+      const isDeepResearch = activeTab === "keywords";
       setIsUsingDeepResearch(isDeepResearch);
       
       // Reset progress state for new request
       setProgressEvents([]);
-      setShowProgress(isDeepResearch); // Only show for deep research mode
+      setShowProgress(isDeepResearch); // Only show progress for deep research mode
       
       // Tell parent component we're starting, with deep research flag if needed
       onGenerationStart({ isDeepResearch });
       
-      // If text input mode is selected and preserve original text mode is enabled
-      if (researchMode === "preserve" && formData.type === "text") {
+      // Text input mode always uses preserve original text
+      if (activeTab === "text" && formData.type === "text") {
         const enhancedResult = await enhanceTextWithCitations(formData.text);
         
         // Convert the enhanced text response to a research summary format
-        // so it works with our existing UI
         const result: ResearchSummary = {
           title: "Enhanced Original Text with Citations",
           content: enhancedResult.enhancedText,
@@ -83,15 +76,14 @@ export default function InputSection({
         };
         
         onGenerationComplete(result);
-      } else if (researchMode === "deep" || activeTab === "keywords") {
+      } 
+      // Keywords input mode always uses deep research
+      else if (activeTab === "keywords") {
         // Use our agentic deep research flow with Claude + Perplexity
-        // Always use deep research for keywords
         let inputText = "";
         
         // Extract the appropriate text based on form data type
-        if (formData.type === "text") {
-          inputText = formData.text;
-        } else if (formData.type === "keywords") {
+        if (formData.type === "keywords") {
           inputText = formData.keywords;
         }
         
@@ -103,10 +95,6 @@ export default function InputSection({
         
         // Call the agentic deep research API
         const result = await performAgenticDeepResearch(inputText);
-        onGenerationComplete(result);
-      } else {
-        // Standard research mode without deep research
-        const result = await generateResearch(formData);
         onGenerationComplete(result);
       }
     } catch (error) {
@@ -192,67 +180,41 @@ export default function InputSection({
             defaultValue="true"
           />
           
-          {/* Research Mode Selection (Radio Buttons) */}
+          {/* Mode descriptions - hardcoded to specific tabs */}
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <h4 className="text-lg font-medium mb-3">Research Mode</h4>
+            <h4 className="text-lg font-medium mb-3">Mode Information</h4>
             
-            <RadioGroup 
-              value={researchMode} 
-              onValueChange={(value) => setResearchMode(value as "standard" | "preserve" | "deep")}
-              className="space-y-3"
-              disabled={activeTab === "keywords"} // Always use deep research for keywords
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="standard" 
-                  id="research-standard" 
-                  disabled={activeTab === "keywords"}
-                />
-                <Label htmlFor="research-standard">
-                  Standard Research
-                </Label>
-              </div>
-              
-              {activeTab === "text" && (
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem 
-                    value="preserve" 
-                    id="research-preserve"
-                  />
-                  <Label htmlFor="research-preserve" className="flex items-center">
-                    Preserve Original Text
-                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md ml-2">
-                      Using Claude 3.7 + Perplexity agent
-                    </span>
-                  </Label>
-                </div>
-              )}
-              
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="deep" 
-                  id="research-deep"
-                />
-                <Label htmlFor="research-deep" className="flex items-center">
-                  Deep Research
-                  <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-md ml-2">
-                    Using Perplexity sonar-deep-research
+            {activeTab === "text" && (
+              <div className="p-4 bg-blue-50 rounded-md">
+                <h5 className="font-medium flex items-center text-blue-700">
+                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">
+                    Text Mode
                   </span>
-                </Label>
-              </div>
-            </RadioGroup>
-            
-            {researchMode === "preserve" && (
-              <div className="mt-2 text-sm text-gray-600 pl-7">
-                This mode will preserve your original text and add authentic citations 
-                from original research papers at appropriate locations.
+                  Preserve Original Text
+                </h5>
+                <p className="mt-2 text-sm text-gray-600">
+                  This mode will preserve your original text and add authentic citations 
+                  from original research papers at appropriate locations.
+                  <br /><br />
+                  <span className="italic">Using Claude 3.7 + Perplexity agent</span>
+                </p>
               </div>
             )}
             
-            {(researchMode === "deep" || activeTab === "keywords") && (
-              <div className="mt-2 text-sm text-gray-600 pl-7">
-                This mode performs in-depth research with comprehensive academic sources.
-                Note: Deep research may take longer to process.
+            {activeTab === "keywords" && (
+              <div className="p-4 bg-purple-50 rounded-md">
+                <h5 className="font-medium flex items-center text-purple-700">
+                  <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-md mr-2">
+                    Keywords Mode
+                  </span>
+                  Deep Research
+                </h5>
+                <p className="mt-2 text-sm text-gray-600">
+                  Creates comprehensive research summaries with deep academic insights.
+                  Uses our combined Claude + Perplexity agentic workflow.
+                  <br /><br />
+                  <span className="italic">Using Perplexity sonar-deep-research</span>
+                </p>
               </div>
             )}
           </div>
