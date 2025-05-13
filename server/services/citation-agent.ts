@@ -42,14 +42,27 @@ interface EnhancedText {
  * @param text The original text to enhance with citations
  * @returns The enhanced text with citations and a list of citations
  */
+/**
+ * Options for research API calls
+ */
+export interface ResearchOptions {
+  searchDomains?: string[];  // List of academic domains to restrict searches to
+  maxTokens?: number;        // Maximum tokens for the response
+}
+
 export async function enhanceTextWithCitations(
   text: string,
+  options?: ResearchOptions
 ): Promise<EnhancedText> {
   try {
     console.log(
       "Starting citation enhancement process for text of length:",
       text.length,
     );
+    
+    if (options?.searchDomains && options.searchDomains.length > 0) {
+      console.log("Using search domains filter:", options.searchDomains.join(", "));
+    }
 
     // Step 1: Identify claims that need citations using Claude
     const fragments = await identifyClaimsNeedingCitations(text);

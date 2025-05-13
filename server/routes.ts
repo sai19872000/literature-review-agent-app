@@ -166,6 +166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const deepResearchSchema = z.object({
         text: z.string().min(3, "Topic must be at least 3 characters long"),
+        searchDomains: z.array(z.string()).optional(),
+        maxTokens: z.number().optional(),
       });
       
       try {
@@ -177,12 +179,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { text } = req.body;
+      const { text, searchDomains, maxTokens } = req.body;
+      
+      if (searchDomains && searchDomains.length > 0) {
+        console.log(`Using restricted search domains: ${searchDomains.join(', ')}`);
+      }
       
       console.log(`Starting agentic deep research on topic: "${text}"`);
       
       // Process the deep research request using our agentic flow
-      const researchSummary = await processDeepResearch(text);
+      const researchSummary = await processDeepResearch(text, { searchDomains, maxTokens });
       
       // Store the research summary in memory storage
       const savedSummary = await storage.saveResearchSummary(researchSummary);
@@ -202,6 +208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const enhanceTextSchema = z.object({
         text: z.string().min(10, "Text must be at least 10 characters long"),
+        searchDomains: z.array(z.string()).optional(),
+        maxTokens: z.number().optional(),
       });
       
       try {
@@ -213,12 +221,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      const { text } = req.body;
+      const { text, searchDomains, maxTokens } = req.body;
       
       console.log(`Enhancing text with citations, text length: ${text.length} characters`);
+      if (searchDomains && searchDomains.length > 0) {
+        console.log(`Using restricted search domains: ${searchDomains.join(', ')}`);
+      }
       
       // Process the text to add citations using our agentic flow
-      const enhancedTextResponse = await enhanceTextWithCitations(text);
+      const enhancedTextResponse = await enhanceTextWithCitations(text, { 
+        searchDomains, 
+        maxTokens 
+      });
       
       res.json(enhancedTextResponse);
     } catch (error) {

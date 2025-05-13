@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResearchForm from "./ResearchForm";
 import ResearchProgress from "./ResearchProgress";
+import AcademicSourcesSelector from "./AcademicSourcesSelector";
 import { ResearchSummary, GenerateResearchRequest } from "@shared/schema";
 import { enhanceTextWithCitations, performAgenticDeepResearch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,8 @@ export default function InputSection({
   // Research progress tracking
   const [progressEvents, setProgressEvents] = useState<any[]>([]);
   const [showProgress, setShowProgress] = useState<boolean>(false);
+  // Academic sources filter
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
 
   // No longer need to auto-select modes as they're fixed per tab
 
@@ -63,7 +66,11 @@ export default function InputSection({
       
       // Text input mode always uses preserve original text
       if (activeTab === "text" && formData.type === "text") {
-        const enhancedResult = await enhanceTextWithCitations(formData.text);
+        // Include the selected academic sources in the API call
+        const enhancedResult = await enhanceTextWithCitations(
+          formData.text, 
+          selectedSources.length > 0 ? { searchDomains: selectedSources } : undefined
+        );
         
         // Convert the enhanced text response to a research summary format
         const result: ResearchSummary = {
@@ -91,8 +98,11 @@ export default function InputSection({
         
         console.log("Starting agentic deep research flow with input:", inputText.substring(0, 100) + "...");
         
-        // Call the agentic deep research API
-        const result = await performAgenticDeepResearch(inputText);
+        // Call the agentic deep research API with selected sources
+        const result = await performAgenticDeepResearch(
+          inputText,
+          selectedSources.length > 0 ? { searchDomains: selectedSources } : undefined
+        );
         onGenerationComplete(result);
       }
     } catch (error) {
@@ -122,6 +132,12 @@ export default function InputSection({
           <h3 className="font-serif text-xl font-bold mb-4 pb-2 border-b border-gray-200">
             Research Input
           </h3>
+          
+          {/* Academic Sources Selector - appears at the top for both tabs */}
+          <AcademicSourcesSelector
+            selectedSources={selectedSources}
+            onSourcesChange={setSelectedSources}
+          />
 
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200 mb-6">
