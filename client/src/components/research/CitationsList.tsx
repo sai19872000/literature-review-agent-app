@@ -16,12 +16,12 @@ export default function CitationsList({ citations }: CitationsListProps) {
   // Just get unique URLs
   const getUniqueUrls = (cits: Citation[]): Citation[] => {
     const seenUrls = new Set<string>();
-    
+
     return cits.filter((citation: Citation) => {
       if (!citation.url || seenUrls.has(citation.url)) {
         return false;
       }
-      
+
       seenUrls.add(citation.url);
       return true;
     });
@@ -32,22 +32,29 @@ export default function CitationsList({ citations }: CitationsListProps) {
 
   return (
     <div className="space-y-4 mt-6">
-      <h3 className="text-xl font-bold mb-4">References ({uniqueCitations.length})</h3>
-      <ol className="list-decimal pl-12 space-y-2 mt-4">
+      <h3 className="text-xl font-bold mb-4">
+        References ({uniqueCitations.length})
+      </h3>
+      <ol className="list-decimal pl-16 space-y-4 mt-6">
         {uniqueCitations.map((citation, index) => (
-          <li key={index} className="citation mb-4 pb-2 border-b border-gray-200 relative">
-            <div className="pl-4"> {/* Add padding to the left to prevent overlap with numbers */}
+          <li
+            key={index}
+            className="citation mb-6 pb-3 border-b border-gray-200 relative"
+          >
+            <div className="ml-8"> 
+              {/* Much more padding to completely separate number and content */}
               {citation.url ? (
-                <a 
-                  href={citation.url} 
+                <a
+                  href={citation.url}
                   target="_blank"
-                  rel="noopener noreferrer" 
+                  rel="noopener noreferrer"
                   className="text-blue-600 hover:underline break-all"
+                  style={{ display: 'block', paddingLeft: '1.5rem' }} /* Additional padding via inline style */
                 >
                   {citation.url}
                 </a>
               ) : (
-                <span className="text-gray-600">No URL available</span>
+                <span className="text-gray-600 block pl-6">No URL available</span>
               )}
             </div>
           </li>
