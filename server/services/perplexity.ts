@@ -38,6 +38,7 @@ interface PerplexityOptions {
   useDeepResearch?: boolean | string; // Allow string for form-data "true"/"false"
   maxTokens?: number;
   temperature?: number;
+  searchDomains?: string[];  // List of domains to restrict search to
 }
 
 /**

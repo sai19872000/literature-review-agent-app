@@ -22,16 +22,29 @@ const anthropic = new Anthropic({
 });
 
 /**
+ * Options for research API calls
+ */
+export interface ResearchOptions {
+  searchDomains?: string[];  // List of academic domains to restrict searches to
+  maxTokens?: number;        // Maximum tokens for the response
+}
+
+/**
  * Main function to process a deep research request using the agentic flow
  *
  * @param topic User's research topic or text
+ * @param options Optional settings including search domains
  * @returns A properly formatted research summary with citations
  */
 export async function processDeepResearch(
   topic: string,
+  options?: ResearchOptions
 ): Promise<ResearchSummary> {
   try {
     console.log(`Starting agentic deep research on topic: "${topic}"`);
+    if (options?.searchDomains && options.searchDomains.length > 0) {
+      console.log("Using search domains filter:", options.searchDomains.join(", "));
+    }
 
     // Broadcast starting message
     broadcastProgress({
@@ -64,11 +77,19 @@ export async function processDeepResearch(
       progress: 40,
     });
 
-    const perplexityResults = await makePerplexitySonarQuery(optimizedQuery, {
+    // Configure options for Perplexity query
+    const perplexityOptions: any = {
       model: "sonar-deep-research",
-      maxTokens: 16000,
+      maxTokens: options?.maxTokens || 16000,
       temperature: 0.2,
-    });
+    };
+    
+    // Add search domains if provided
+    if (options?.searchDomains && options.searchDomains.length > 0) {
+      perplexityOptions.searchDomains = options.searchDomains;
+    }
+    
+    const perplexityResults = await makePerplexitySonarQuery(optimizedQuery, perplexityOptions);
 
     // Process citations using the enhanced citation processor
     // ONLY use the citations that Perplexity actually returns
