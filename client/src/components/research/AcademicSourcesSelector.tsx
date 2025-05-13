@@ -185,6 +185,57 @@ export default function AcademicSourcesSelector({
                   </Select>
                 </div>
                 
+                <div className="flex justify-between items-center mb-3">
+                  <div className="space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Select all visible/filtered sources
+                        const sourcesToSelect = filteredSources.map(source => source.id);
+                        
+                        // Add only sources that aren't already selected
+                        const newSelectedSources = [...selectedSources];
+                        sourcesToSelect.forEach(id => {
+                          if (!newSelectedSources.includes(id)) {
+                            newSelectedSources.push(id);
+                          }
+                        });
+                        
+                        onSourcesChange(newSelectedSources);
+                      }}
+                    >
+                      Select All Visible
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Select all sources in the current category if a specific category is selected,
+                        // otherwise select all sources
+                        let sourcesToSelect;
+                        if (selectedCategory !== 'all') {
+                          sourcesToSelect = ACADEMIC_SOURCES
+                            .filter(source => source.category === selectedCategory)
+                            .map(source => source.id);
+                        } else {
+                          sourcesToSelect = ACADEMIC_SOURCES.map(source => source.id);
+                        }
+                        onSourcesChange(sourcesToSelect);
+                      }}
+                    >
+                      {selectedCategory === 'all' ? 'Select All Sources' : `Select All ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}s`}
+                    </Button>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onSourcesChange([])}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                
                 <ScrollArea className="h-[300px] border rounded-md p-4">
                   {selectedCategory === 'all' && (
                     <>
