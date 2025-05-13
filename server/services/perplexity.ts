@@ -236,6 +236,10 @@ export async function makePerplexitySonarQuery(
     console.log(
       `Making direct Perplexity query with model: ${options.model}, query length: ${query.length}`,
     );
+    
+    if (options.searchDomains && options.searchDomains.length > 0) {
+      console.log(`Using search domains filter: ${options.searchDomains.join(', ')}`);
+    }
 
     const model = options.model || "sonar-pro";
     const maxTokens = options.maxTokens || 8000;
@@ -260,11 +264,13 @@ export async function makePerplexitySonarQuery(
         temperature,
         max_tokens: maxTokens,
         stream: false,
-        search_domain_filter: [
-          "ncbi.nlm.nih.gov",
-          "scholar.google.com",
-          "sciencedirect.com",
-        ],
+        search_domain_filter: options.searchDomains && options.searchDomains.length > 0 
+          ? options.searchDomains 
+          : [
+              "ncbi.nlm.nih.gov",
+              "scholar.google.com",
+              "sciencedirect.com",
+            ],
         return_images: false,
       },
       {
